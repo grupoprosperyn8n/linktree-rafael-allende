@@ -464,12 +464,10 @@ function suggestQuickReplies(replyText, data = {}) {
         contextualHint = 'Para cargar la denuncia, primero verifiquemos tu estado';
     } else if (isPolicySensitive) {
         addQuickReplies([
-            { label: 'Fecha de vencimiento' },
-            { label: 'Cobertura' },
-            { label: 'Estado de póliza' },
-            { label: 'Ver mis pólizas' },
+            { label: 'Soy cliente' },
+            { label: 'No soy cliente' },
         ]);
-        contextualHint = 'Elegí qué querés revisar';
+        contextualHint = 'Para ver tus pólizas, primero verifiquemos tu estado';
     } else if (isFaq) {
         addQuickReplies([
             { label: 'Coberturas' },
