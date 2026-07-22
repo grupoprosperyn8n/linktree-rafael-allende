@@ -26,6 +26,7 @@ let lastPortalPassword = '';
 let conversationIntent = '';
 let lastUserMessage = '';
 let lastUserIntent = '';
+let clientValidationFlow = ''; // 'asking_if_client', 'client_validated', 'not_client'
 
 function getWebChatSessionId() {
     let sessionId = localStorage.getItem(WEBCHAT_SESSION_KEY);
