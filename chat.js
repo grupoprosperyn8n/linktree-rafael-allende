@@ -458,11 +458,10 @@ function suggestQuickReplies(replyText, data = {}) {
         contextualHint = 'Contame tu situación y te asisto urgente';
     } else if (isClaim) {
         addQuickReplies([
-            { label: 'Cargar denuncia', url: 'https://linktree.rafaelallendeseguros.digital/?modal=siniestro' },
-            { label: 'Hablar con asesor' },
-            { label: 'Volver al menú' },
+            { label: 'Soy cliente' },
+            { label: 'No soy cliente' },
         ]);
-        contextualHint = 'Usá el botón para iniciar la denuncia formal';
+        contextualHint = 'Para cargar la denuncia, primero verifiquemos tu estado';
     } else if (isPolicySensitive) {
         addQuickReplies([
             { label: 'Fecha de vencimiento' },
