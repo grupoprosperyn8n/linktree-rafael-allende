@@ -498,11 +498,10 @@ function suggestQuickReplies(replyText, data = {}) {
         contextualHint = 'Para ver el estado de tu gestión, primero verifiquemos tu estado';
     } else if (isDocSensitive) {
         addQuickReplies([
-            { label: 'Qué me falta' },
-            { label: 'Subir documento' },
-            { label: 'Hablar con asesor' },
+            { label: 'Soy cliente' },
+            { label: 'No soy cliente' },
         ]);
-        contextualHint = 'Revisemos tu documentación';
+        contextualHint = 'Para revisar documentación, primero verifiquemos tu estado';
     } else if (isHumanHandoff) {
         addQuickReplies([
             { label: 'Llamame', url: 'https://wa.me/5493417035515' },
