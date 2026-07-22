@@ -544,12 +544,10 @@ function suggestQuickReplies(replyText, data = {}) {
         contextualHint = 'Si no la tenés o la olvidaste, usá estas opciones';
     } else if (isGreeting) {
         addQuickReplies([
-            { label: 'Ver pólizas' },
-            { label: 'Reportar siniestro', url: 'https://linktree.rafaelallendeseguros.digital/?modal=siniestro' },
-            { label: 'Agendar asesoría', url: 'https://linktree.rafaelallendeseguros.digital/?modal=asesoria' },
-            { label: 'Emergencia / Auxilio' },
+            { label: 'Soy cliente' },
+            { label: 'No soy cliente' },
         ]);
-        contextualHint = 'Por otra cosa, escribime o mandame un audio';
+        contextualHint = 'Elegí para continuarte ayudando';
     } else if (isHelpOffer) {
         addQuickReplies([
             { label: 'Ver pólizas' },
