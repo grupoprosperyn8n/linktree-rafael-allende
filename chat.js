@@ -454,6 +454,7 @@ function suggestQuickReplies(replyText, data = {}) {
     const isError = /no pude|no coincide|error|inválido|incorrecto|demora/i.test(lower);
     const isClientYes = intent === 'client_yes' || userIntentLower === 'client_yes';
     const isClientNo = intent === 'client_no' || userIntentLower === 'client_no';
+    const isContinueWithoutValidation = intent === 'continue_without_validation' || userIntentLower === 'continue_without_validation';
 
     let contextualHint = '';
 
