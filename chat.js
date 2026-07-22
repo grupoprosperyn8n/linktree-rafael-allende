@@ -474,6 +474,15 @@ function suggestQuickReplies(replyText, data = {}) {
             { label: 'Seguir sin validarme' },
         ]);
         contextualHint = 'Podes registrarte o continuar sin validación';
+    } else if (isContinueWithoutValidation) {
+        clientValidationFlow = 'not_client';
+        addQuickReplies([
+            { label: 'Consultas generales' },
+            { label: 'Cotizar seguro' },
+            { label: 'Agendar asesoría', url: 'https://linktree.rafaelallendeseguros.digital/?modal=asesoria' },
+            { label: 'Contactar WhatsApp', url: 'https://wa.me/5493417035515' },
+        ]);
+        contextualHint = 'Estas son las gestiones disponibles para vos';
     } else if (isEmergency) {
         addQuickReplies([
             { label: 'Hay heridos' },
