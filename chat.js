@@ -101,6 +101,8 @@ function detectUserIntent(text) {
 
     if (/no soy cliente|no tengo cuenta|no tengo p[oó]liza|nunca (me |)registr[ée]|no estoy registrado|nuevo cliente|quiero registrarme|primera vez/i.test(lower)) return 'client_no';
 
+    if (/seguir sin validarme|sin validaci[oó]n|continuar sin|no validar|skip validation|como no cliente/i.test(lower)) return 'continue_without_validation';
+
     if (/dar de baja|darme de baja|cancelar (p[oó]liza|seguro)|no quiero m[aá]s|no (lo |)renuevo|modificar (p[oó]liza|seguro)|cambiar (de |)cobertura|actualizar datos|cambio de (domicilio|veh[ií]culo)|vend[ií] el (auto|veh[ií]culo)/i.test(lower)) return 'cancel_change';
 
     if (/imagen|im[aá]genes|foto|fotos|captura|documento|documentos|archivo|archivos|pdf|adjunto|adjuntos|audio\b|escuchar|revis[aá] (esta |el |la |este )|mir[aá] (esta |el |la )/i.test(lower)) return 'media_review';
