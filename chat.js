@@ -450,10 +450,28 @@ function suggestQuickReplies(replyText, data = {}) {
     const isHelpOffer = intent === 'general' && /algo más|otra consulta|necesitás|necesitas|por acá para|decime|cualquier cosa/i.test(lower);
     const isValidation = /contraseña|contrasena|validarte|validar|escribime la|pasame la|te valido|DNI|dni\b/i.test(lower);
     const isError = /no pude|no coincide|error|inválido|incorrecto|demora/i.test(lower);
+    const isClientYes = intent === 'client_yes' || userIntentLower === 'client_yes';
+    const isClientNo = intent === 'client_no' || userIntentLower === 'client_no';
 
     let contextualHint = '';
 
-    if (isEmergency) {
+    if (isClientYes) {
+        clientValidationFlow = 'client_validated';
+        addQuickReplies([
+            { label: 'Iniciar sesión en Portal', url: 'https://portal.rafaelallendeseguros.digital/' },
+            { label: 'Recuperar contraseña', url: 'https://portal.rafaelallendeseguros.digital/recuperar-clave.html' },
+            { label: 'Seguir sin validarme' },
+        ]);
+        contextualHint = 'Para acceder a tus datos, iniciá sesión o recuperá tu clave';
+    } else if (isClientNo) {
+        clientValidationFlow = 'not_client';
+        addQuickReplies([
+            { label: 'Registrarme como cliente', url: 'https://portal.rafaelallendeseguros.digital/registro.html' },
+            { label: 'Recuperar contraseña', url: 'https://portal.rafaelallendeseguros.digital/recuperar-clave.html' },
+            { label: 'Seguir sin validarme' },
+        ]);
+        contextualHint = 'Podes registrarte o continuar sin validación';
+    } else if (isEmergency) {
         addQuickReplies([
             { label: 'Hay heridos' },
             { label: 'Necesito auxilio' },
