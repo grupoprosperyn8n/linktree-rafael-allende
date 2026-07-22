@@ -545,11 +545,10 @@ function suggestQuickReplies(replyText, data = {}) {
         contextualHint = 'Elegí para continuarte ayudando';
     } else if (isHelpOffer) {
         addQuickReplies([
-            { label: 'Ver pólizas' },
-            { label: 'Reportar siniestro', url: 'https://linktree.rafaelallendeseguros.digital/?modal=siniestro' },
-            { label: 'Hablar con asesor' },
+            { label: 'Soy cliente' },
+            { label: 'No soy cliente' },
         ]);
-        contextualHint = 'Por otra cosa, escribime o mandame un audio';
+        contextualHint = 'Elegí para continuarte ayudando';
     }
 
     if (contextualHint) {
