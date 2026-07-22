@@ -1,0 +1,50 @@
+{
+  "robo-incendio": {
+    "titulo": "Robo / Incendio",
+    "icono": "fa-fire",
+    "color": "#e67e22",
+    "campos": [
+      { "id": "fecha", "label": "Fecha del Siniestro", "type": "date", "required": true, "placeholder": "", "options": [] },
+      { "id": "hora", "label": "Hora Aprox.", "type": "text", "required": true, "placeholder": "", "options": [] },
+      { "id": "direccion", "label": "Lugar del Hecho", "type": "text", "required": true, "placeholder": "", "options": [] },
+      { "id": "tipo_hecho", "label": "Clasificación", "type": "select", "required": true, "placeholder": "", "options": ["ROBO TOTAL", "INCENDIO TOTAL", "INCENDIO PARCIAL"] },
+      { "id": "relato", "label": "Relato", "type": "textarea", "required": true, "placeholder": "", "options": [] },
+      { "id": "foto_dni", "label": "Foto DNI", "type": "file", "required": true, "placeholder": "", "options": [] },
+      { "id": "foto_cedula", "label": "Foto Cédula", "type": "file", "required": true, "placeholder": "", "options": [] },
+      { "id": "foto_carnet", "label": "Foto Carnet", "type": "file", "required": true, "placeholder": "", "options": [] }
+    ]
+  },
+  "accidente": {
+    "titulo": "Denuncia de Accidente",
+    "icono": "fa-car-crash",
+    "color": "#e74c3c",
+    "campos": [
+      { "id": "fecha", "label": "Fecha del Siniestro", "type": "date", "required": true, "placeholder": "", "options": [] },
+      { "id": "hora", "label": "Hora Aprox. (00-23)", "type": "text", "required": true, "placeholder": "", "options": [] },
+      { "id": "direccion", "label": "Lugar del Hecho", "type": "text", "required": true, "placeholder": "", "options": [] },
+      { "id": "localidad", "label": "Localidad / Prov. / País", "type": "text", "required": true, "placeholder": "", "options": [] },
+      { "id": "uso", "label": "Uso del Vehículo", "type": "select", "required": true, "placeholder": "", "options": ["PARTICULAR", "COMERCIAL", "REMIS-TAXI"] },
+      { "id": "relato", "label": "Relato del Hecho", "type": "textarea", "required": true, "placeholder": "", "options": [] },
+      { "id": "terceros", "label": "¿Hubo Terceros?", "type": "select", "required": true, "placeholder": "", "options": ["SI", "NO"] },
+      { "id": "lesionados", "label": "¿Hubo Lesionados?", "type": "select", "required": false, "placeholder": "", "options": ["SI", "NO"] },
+      { "id": "foto_dni", "label": "Foto DNI (Ambos Lados)", "type": "file", "required": true, "placeholder": "", "options": [] },
+      { "id": "foto_cedula", "label": "Foto Cédula (Ambos Lados)", "type": "file", "required": true, "placeholder": "", "options": [] },
+      { "id": "foto_carnet", "label": "Foto Carnet (Ambos Lados)", "type": "file", "required": true, "placeholder": "", "options": [] },
+      { "id": "fotos_dano", "label": "Fotos Daños (Máx 3)", "type": "file", "required": true, "placeholder": "", "options": [] }
+    ]
+  },
+  "robo-parcial": {
+    "titulo": "Robo Parcial (Ruedas/Cristales)",
+    "icono": "fa-mask",
+    "color": "#8e44ad",
+    "campos": [
+      { "id": "fecha", "label": "Fecha", "type": "date", "required": true, "placeholder": "", "options": [] },
+      { "id": "direccion", "label": "Lugar del Hecho", "type": "text", "required": true, "placeholder": "", "options": [] },
+      { "id": "elemento", "label": "Clasificación del Daño", "type": "select", "required": true, "placeholder": "", "options": ["RUEDA", "CRISTAL", "CERRADURA", "BATERIA"] },
+      { "id": "relato", "label": "Relato", "type": "textarea", "required": true, "placeholder": "", "options": [] },
+      { "id": "foto_dni", "label": "Foto DNI", "type": "file", "required": true, "placeholder": "", "options": [] },
+      { "id": "fotos_dano", "label": "Fotos Daños", "type": "file", "required": false, "placeholder": "", "options": [] },
+      { "id": "hora", "label": "Hora del hecho", "type": "text", "required": true, "placeholder": "", "options": [] }
+    ]
+  }
+}

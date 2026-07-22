@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rafael Allende &amp; Asociados | Seguros</title>
+    <meta name="description" content="Tu seguro de confianza en Rosario. Cotiza tu auto, reporta siniestros y gestiona tu cuenta.">
+    <link rel="stylesheet" href="styles.css?v=webchat-media-compact-v9">
+    <!-- Flatpickr (Calendario) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+      .swal2-container { z-index: 10000 !important; }
+      .flatpickr-calendar { z-index: 10000 !important; }
+
+      html,
+      body,
+      .modal-content,
+      .modal-body,
+      .branches-list,
+      .qs-modal-wrapper,
+      .scrollbar-hidden {
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+      html::-webkit-scrollbar,
+      body::-webkit-scrollbar,
+      .modal-content::-webkit-scrollbar,
+      .modal-body::-webkit-scrollbar,
+      .branches-list::-webkit-scrollbar,
+      .qs-modal-wrapper::-webkit-scrollbar,
+      .scrollbar-hidden::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+      }
+
+      /* === HEADER CIAN para Asesoría (Según Logo) === */
+      .glass-premium .modal-header.warning {
+        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%) !important;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.2) !important;
+      }
+      .glass-premium .modal-header.warning h2 { color: #ffffff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; }
+      .glass-premium .modal-header.warning i { color: #ffff00 !important; filter: drop-shadow(0 0 8px rgba(255, 255, 0, 0.5)) !important; }
+
+      /* === CALENDARIO - Alto contraste === */
+      #calendly-widget { background: #ffffff !important; }
+      #calendly-days-panel { background: #f8fafc !important; border-right: 1px solid #e2e8f0 !important; }
+      #cal-grid button { color: #0f172a !important; font-weight: 800 !important; font-size: 1.05rem !important; }
+      #cal-grid button:disabled { color: #94a3b8 !important; font-weight: 400 !important; }
+      .cal-month-title { color: #1e3a8a !important; font-weight: 800 !important; }
+      .cal-day-header { color: #334155 !important; font-weight: 800 !important; }
+      #cal-slots-placeholder p { color: #334155 !important; font-weight: 700 !important; font-size: 1.1rem !important; }
+
+      .asesoria-auth-row {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+      }
+      .asesoria-verify-group {
+        flex: 0 0 180px;
+        margin-bottom: 0 !important;
+      }
+      .asesoria-verify-label {
+        display: block;
+        min-height: 19px;
+        margin-bottom: 6px;
+        visibility: hidden;
+      }
+      #btn-verificar-cliente {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        min-height: 48px;
+        padding: 0 20px;
+        background: rgba(30, 58, 138, 0.96);
+        color: #ffffff;
+        border: 1px solid rgba(96, 165, 250, 0.35);
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        box-shadow: 0 10px 20px rgba(30, 58, 138, 0.18);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      }
+      #btn-verificar-cliente:hover {
+        transform: translateY(-1px);
+        background: #2646a1;
+        box-shadow: 0 14px 26px rgba(30, 58, 138, 0.24);
+      }
+
+      /* === BOTÓN submit asesoria alineado al header === */
+      #btn-confirmar-asesoria {
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        width: 100%; max-width: 380px; margin: 0 auto;
+        padding: 14px 28px; border: none; border-radius: 14px; cursor: pointer;
+        font-size: 1.1rem; font-weight: 800; letter-spacing: 0.5px;
+        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%) !important;
+        color: #ffff00 !important;
+        box-shadow: 0 10px 28px rgba(0, 210, 255, 0.24), 0 0 22px rgba(255, 255, 0, 0.18) !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.18);
+        transition: all 0.22s;
+      }
+      #btn-confirmar-asesoria i { color: #ffff00 !important; }
+      #btn-confirmar-asesoria:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 34px rgba(0, 210, 255, 0.32), 0 0 26px rgba(255, 255, 0, 0.24) !important;
+        background: linear-gradient(135deg, #15d6ff 0%, #4a88dc 100%) !important;
+      }
+      #btn-confirmar-asesoria:disabled { opacity: 0.65; transform: none; cursor: not-allowed; }
+
+      .swal-asesoria-close,
+      .swal-asesoria-download {
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 11px 16px !important;
+        font-size: 0.94rem !important;
+        font-weight: 800 !important;
+        min-width: 168px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+      }
+      .swal-asesoria-popup {
+        width: min(92vw, 660px) !important;
+        padding: 1.05rem 1.15rem 0.95rem !important;
+      }
+      .swal-asesoria-popup .swal2-icon {
+        margin: 0.2em auto 0.35em !important;
+        transform: scale(0.78);
+      }
+      .swal-asesoria-title {
+        font-size: 1.65rem !important;
+        margin: 0 auto 0.35rem !important;
+        line-height: 1.1 !important;
+      }
+      .swal-asesoria-html {
+        margin: 0.2rem 0 0 !important;
+      }
+      .swal-asesoria-actions {
+        margin: 0.9rem auto 0 !important;
+        gap: 10px !important;
+      }
+      .swal-asesoria-close {
+        background: rgba(15, 23, 42, 0.96) !important;
+        color: #e2e8f0 !important;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18) !important;
+      }
+      .swal-asesoria-download {
+        background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%) !important;
+        color: #ffff00 !important;
+        box-shadow: 0 12px 26px rgba(0, 210, 255, 0.24) !important;
+      }
+      .swal-asesoria-close:hover,
+      .swal-asesoria-download:hover {
+        transform: translateY(-1px);
+      }
+
+      @media (max-width: 768px) {
+        .asesoria-verify-group {
+          flex: 1 1 100%;
+        }
+        .swal-asesoria-popup {
+          width: calc(100vw - 26px) !important;
+          padding: 0.9rem 0.9rem 0.85rem !important;
+        }
+        .swal-asesoria-title {
+          font-size: 1.42rem !important;
+        }
+        .swal-asesoria-close,
+        .swal-asesoria-download {
+          width: 100%;
+          min-width: 0;
+        }
+      }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    >
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  </head>
+  <body>
+
+    <!-- Fondo animado -->
+    <div class="background-animation"></div>
+
+    <!-- Container principal -->
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo-container">
+          <img
+            src="assets/logo.png"
+            alt="Rafael Allende & Asociados"
+            class="logo"
+          >
+        </div>
+        <div class="header-info">
+          <div class="rating" id="rating-display">
+            <div class="loading-spinner">
+              <span>Cargando...</span>
+            </div>
+          </div>
+          <p class="tagline">Tu tranquilidad, nuestra prioridad</p>
+          <div class="location">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Rosario, Argentina</span>
+          </div>
+        </div>
+        <div class="social-links">
+          <a
+            href="https://facebook.com/rafaelallendeasociados"
+            target="_blank"
+            aria-label="Facebook"
+          >
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a
+            href="https://instagram.com/rafaelallendeasociados"
+            target="_blank"
+            aria-label="Instagram"
+          >
+            <i class="fab fa-instagram"></i>
+          </a>
+
+        </div>
+      </header>
+
+      <!-- Testimonios Carrusel -->
+      <section class="testimonials-section" id="testimonials">
+        <h3 class="testimonials-title">
+          <i class="fas fa-comments"></i>
+          Lo que dicen nuestros clientes
+        </h3>
+        <div class="testimonials-carousel" id="testimonials-carousel">
+          <div class="loading-spinner">
+            <span>Cargando opiniones...</span>
+          </div>
+        </div>
+        <div class="carousel-dots" id="carousel-dots"></div>
+      </section>
+
+      <!-- Links principales -->
+      <main class="links-container">
+        <!-- Fila 1: Asesoría Online -->
+        <button type="button" class="link-button primary" style="grid-column: 1 / -1;" onclick="openModal('asesoria')">
+          <div class="button-icon">
+            <i class="fas fa-video" style="color: #FFD700;"></i>
+          </div>
+          <div class="button-content">
+            <span class="button-title">Reserva de Asesoría Online</span>
+            <span class="button-subtitle">Videollamada con un experto</span>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Fila 2: Cotiza tu Seguro -->
+        <button type="button" class="link-button primary" onclick="openModal('cotizador')">
+          <div class="button-icon">
+            <i class="fas fa-car"></i>
+          </div>
+          <div class="button-content">
+            <span class="button-title">Cotiza tu Seguro</span>
+            <span class="button-subtitle">Obtén tu cotización en minutos</span>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Fila 2: Reportar Siniestro -->
+        <button type="button" class="link-button danger" onclick="openModal('siniestro')">
+          <div class="button-icon">
+            <i class="fas fa-car-crash"></i>
+          </div>
+          <div class="button-content">
+            <span class="button-title">Reportar Siniestro</span>
+            <span class="button-subtitle">Atención inmediata 24/7</span>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Fila 2: Quiénes Somos -->
+        <button type="button" class="link-button" onclick="openModal('nosotros')">
+          <div class="button-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <div class="button-content">
+            <span class="button-title">Quiénes Somos</span>
+            <span class="button-subtitle">Más de 20 años de experiencia</span>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Fila 2: Sucursales -->
+        <button type="button" class="link-button" onclick="openModal('sucursales')">
+          <div class="button-icon">
+            <i class="fas fa-map-marked-alt"></i>
+          </div>
+          <div class="button-content">
+            <span class="button-title">Nuestras Sucursales</span>
+            <span class="button-subtitle">Encuéntranos cerca de ti</span>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Fila 3: Preguntas Frecuentes -->
+        <button type="button" class="link-button" onclick="openModal('faq')">
+          <div class="button-icon">
+            <i class="fas fa-question-circle"></i>
+          </div>
+          <div class="button-content">
+            <span class="button-title">Preguntas Frecuentes</span>
+            <span class="button-subtitle">Resuelve tus dudas</span>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Fila 3: Calificar Atención -->
+        <button type="button" class="link-button" onclick="openModal('calificar')">
+          <div class="button-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="button-content">
+            <span class="button-title">Califica Atención</span>
+            <span class="button-subtitle">Tu opinión importa</span>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Fila 4: Mi Cuenta (Clientes) -->
+        <button type="button" class="link-button account" onclick="openModal('cuenta')">
+          <div class="button-icon">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="button-content">
+            <span class="button-title">Mi Cuenta</span>
+            <span class="button-subtitle">Portal de clientes</span>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Fila 4: Acceso Autorizado (Empleados) -->
+        <button type="button" class="link-button employee" onclick="openModal('acceso')">
+          <div class="button-icon">
+            <i class="fas fa-key"></i>
+          </div>
+          <div class="button-content">
+            <span class="button-title">Acceso Autorizado</span>
+            <span class="button-subtitle">Portal empleados</span>
+          </div>
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- Fila 5: Red de Beneficios (CTA Llamativo) -->
+        <button type="button" class="link-button primary cta-beneficios" style="grid-column: 1 / -1; position: relative; overflow: hidden;" onclick="window.open('https://beneficios.rafaelallendeseguros.digital/', '_blank')">
+          <span class="badge pulse-badge">¡NUEVO!</span>
+          <div class="button-icon" style="position: relative; z-index: 2;">
+            <i class="fas fa-gift" style="color: #FF8800; text-shadow: 0 0 10px rgba(255, 136, 0, 0.8);"></i>
+          </div>
+          <div class="button-content" style="margin-top: 12px; display: flex; flex-direction: column; gap: 4px; position: relative; z-index: 2;">
+            <span class="button-title" style="font-size: 1.05rem; letter-spacing: 0.5px;">¡Conoce nuestra Red de Beneficios!</span>
+            <span class="button-subtitle" style="color: var(--white); font-weight: 500; font-size: 0.85rem;">Descuentos exclusivos en +300 comercios</span>
+          </div>
+          <i class="fas fa-chevron-right" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); opacity: 0.5; z-index: 2;"></i>
+        </button>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>© 2024 Rafael Allende & Asociados</p>
+        <p>Productores de Seguros Matriculados</p>
+      </footer>
+    </div>
+
+    <!-- El Asesor IA se maneja desde el script chat.js -->
+
+    <div id="scroll-indicator" class="scroll-indicator hidden" aria-hidden="true" style="display: none;">
+      <div class="mouse"><div class="wheel"></div></div>
+      <div class="arrow"><span></span><span></span><span></span></div>
+    </div>
+
+    <div id="global-scroll-indicator" class="modal-scroll-indicator hidden" aria-hidden="true" style="display: none;">
+      <div class="mouse"><div class="wheel"></div></div>
+      <div class="arrow"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- MODALES -->
+
+    <!-- Modal MultiCotizador -->
+    <div id="modal-cotizador" class="modal">
+      <div class="modal-content glass-premium" style="max-width: 720px; width: 96vw;">
+        <button class="modal-close" onclick="closeModal('cotizador')" aria-label="Cerrar modal">
+          &times;
+        </button>
+        <div class="modal-header">
+          <i class="fas fa-car"></i>
+          <h2>MultiCotizador de Seguros</h2>
+        </div>
+        <div class="modal-body" style="max-height: 82vh; overflow-y: auto;">
+
+          <!-- Barra de Progreso -->
+          <div class="mcot-progress">
+            <div class="mcot-step-dot active" data-step="1">
+              <span class="mcot-dot-num">1</span>
+              <span class="mcot-dot-label">Vehículo</span>
+            </div>
+            <div class="mcot-step-line"></div>
+            <div class="mcot-step-dot" data-step="2">
+              <span class="mcot-dot-num">2</span>
+              <span class="mcot-dot-label">Contacto</span>
+            </div>
+            <div class="mcot-step-line"></div>
+            <div class="mcot-step-dot" data-step="3">
+              <span class="mcot-dot-num">3</span>
+              <span class="mcot-dot-label">Cotizaciones</span>
+            </div>
+          </div>
+
+          <!-- PASO 1: Datos del Vehículo -->
+          <div id="mcot-step-1" class="mcot-panel active">
+            <div class="mcot-section-title">
+              <i class="fas fa-car-side"></i> Datos de tu vehículo
+            </div>
+            <form id="mcot-form-vehiculo" class="form">
+              <!-- Búsqueda por patente (opcional) -->
+              <div class="mcot-patente-section">
+                <div class="form-group">
+                  <label for="mcot-patente">
+                    <i class="fas fa-search" style="color: #22d3ee; margin-right: 4px;"></i>
+                    Buscá por patente <span style="font-weight:400; color: var(--white-50);">(opcional)</span>
+                  </label>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="text" id="mcot-patente" placeholder="Ej: AB123CD o ABC123" 
+                           maxlength="7" style="text-transform: uppercase; flex: 1;" />
+                    <button type="button" class="mcot-btn-buscar-patente" id="mcot-btn-patente" onclick="mcotBuscarPatente()">
+                      <i class="fas fa-search"></i>
+                    </button>
+                  </div>
+                  <small id="mcot-patente-status" style="display:none; margin-top: 4px;"></small>
+                </div>
+                <div class="mcot-divider">
+                  <span>o completá manualmente</span>
+                </div>
+              </div>
+
+              <!-- Marca (cargada desde API) -->
+              <div class="form-group">
+                <label for="mcot-marca">Marca <span class="required">*</span></label>
+                <select id="mcot-marca" required>
+                  <option value="">Cargando marcas...</option>
+                </select>
+              </div>
+
+              <!-- Modelo (cargado dinámicamente) -->
+              <div class="form-group">
+                <label for="mcot-modelo">Modelo <span class="required">*</span></label>
+                <select id="mcot-modelo" disabled required>
+                  <option value="">Primero seleccioná una marca</option>
+                </select>
+              </div>
+
+              <!-- Versión (cargada dinámicamente) -->
+              <div class="form-group">
+                <label for="mcot-version">Versión <span style="font-weight:400; color: var(--white-50);">(recomendado)</span></label>
+                <select id="mcot-version" disabled>
+                  <option value="">Primero seleccioná un modelo</option>
+                </select>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="mcot-anio">Año <span class="required">*</span></label>
+                  <select id="mcot-anio" required>
+                    <option value="">Año</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="mcot-gnc">¿Tiene GNC?</label>
+                  <select id="mcot-gnc">
+                    <option value="no">No</option>
+                    <option value="si">Sí</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="mcot-cobertura">Tipo de cobertura <span class="required">*</span></label>
+                <select id="mcot-cobertura" required>
+                  <option value="">Seleccioná una cobertura</option>
+                  <option value="rc">Responsabilidad Civil</option>
+                  <option value="tc">Terceros Completo</option>
+                  <option value="tcg">Terceros Completo + Granizo</option>
+                  <option value="trcf">Todo Riesgo con Franquicia</option>
+                  <option value="trsf">Todo Riesgo sin Franquicia</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="mcot-provincia">Provincia <span class="required">*</span></label>
+                  <select id="mcot-provincia" required>
+                    <option value="">Cargando provincias...</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="mcot-localidad">Localidad <span class="required">*</span></label>
+                  <select id="mcot-localidad" disabled required>
+                    <option value="">Primero seleccioná provincia</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn-submit mcot-btn-next">
+                Siguiente <i class="fas fa-arrow-right"></i>
+              </button>
+            </form>
+          </div>
+
+          <!-- PASO 2: Datos de Contacto -->
+          <div id="mcot-step-2" class="mcot-panel">
+            <div class="mcot-section-title">
+              <i class="fas fa-user"></i> Tus datos de contacto
+            </div>
+            <p style="color: var(--white-70); font-size: 0.88rem; margin-bottom: 16px;">
+              Para enviarte la cotización y que un asesor pueda contactarte.
+            </p>
+            <form id="mcot-form-contacto" class="form">
+              <div class="form-group">
+                <label for="mcot-nombre">Nombre completo <span class="required">*</span></label>
+                <input type="text" id="mcot-nombre" placeholder="Tu nombre" required />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="mcot-whatsapp">WhatsApp <span class="required">*</span></label>
+                  <input type="tel" id="mcot-whatsapp" placeholder="+54 9 341 555 1234" required />
+                </div>
+                <div class="form-group">
+                  <label for="mcot-email">Email</label>
+                  <input type="email" id="mcot-email" placeholder="tu@email.com" />
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <button type="button" class="btn-secondary mcot-btn-back" onclick="mcotGoStep(1)">
+                  <i class="fas fa-arrow-left"></i> Volver
+                </button>
+                <button type="submit" class="btn-submit mcot-btn-next" style="flex:1;">
+                  <i class="fas fa-search"></i> Buscar Cotizaciones
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- PASO 3: Resultados -->
+          <div id="mcot-step-3" class="mcot-panel">
+
+            <!-- Loader animado -->
+            <div id="mcot-loader" class="mcot-loader" style="display:none;">
+              <div class="mcot-loader-animation">
+                <div class="mcot-car-icon">
+                  <i class="fas fa-car-side"></i>
+                </div>
+                <div class="mcot-loader-bar">
+                  <div class="mcot-loader-fill"></div>
+                </div>
+              </div>
+              <p class="mcot-loader-text">Buscando las mejores cotizaciones...</p>
+              <p class="mcot-loader-sub">Comparando compañías para <strong id="mcot-loader-vehiculo"></strong></p>
+            </div>
+
+            <!-- Resumen del vehículo -->
+            <div id="mcot-resumen" style="display:none;">
+              <div class="mcot-vehicle-badge">
+                <i class="fas fa-car"></i>
+                <span id="mcot-resumen-vehiculo"></span>
+                <span class="mcot-resumen-cobertura" id="mcot-resumen-cobertura"></span>
+              </div>
+
+              <!-- Contador de resultados -->
+              <div class="mcot-results-header">
+                <h3><i class="fas fa-chart-bar"></i> <span id="mcot-results-count">0</span> cotizaciones encontradas</h3>
+                <div class="mcot-sort">
+                  <label>Ordenar:</label>
+                  <select id="mcot-sort" onchange="mcotSortResults()">
+                    <option value="precio-asc">Menor precio</option>
+                    <option value="precio-desc">Mayor precio</option>
+                    <option value="compania">Compañía A-Z</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Cards de cotizaciones -->
+              <div id="mcot-results-grid" class="mcot-results-grid"></div>
+
+              <!-- Disclaimer -->
+              <div class="mcot-disclaimer">
+                <i class="fas fa-info-circle"></i>
+                Precios de referencia actualizados. La cotización final está sujeta a inspección del vehículo y verificación de datos.
+              </div>
+
+              <!-- Botones finales -->
+              <div style="display: flex; gap: 10px; margin-top: 16px;">
+                <button type="button" class="btn-secondary" onclick="mcotGoStep(1)">
+                  <i class="fas fa-redo"></i> Nueva Cotización
+                </button>
+                <button type="button" class="btn-submit" style="flex:1;" onclick="mcotContactarAsesor()">
+                  <i class="fab fa-whatsapp"></i> Hablar con un Asesor
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Siniestro -->
+    <div id="modal-siniestro" class="modal">
+      <div class="modal-content glass-premium">
+        <button class="modal-close" onclick="closeModal('siniestro')" aria-label="Cerrar modal">
+          &times;
+        </button>
+        
+        <div class="modal-header danger">
+          <i class="fas fa-car-crash"></i>
+          <h2>Reportar Siniestro</h2>
+        </div>
+        
+        <div class="modal-body">
+          <!-- PASO 1: Validación -->
+          <div id="step-validation-siniestro" class="step-siniestro active">
+            <div class="alert-box">
+              <i class="fas fa-info-circle"></i>
+              <p>Ingresá tu DNI y Patente para verificar tu cobertura</p>
+            </div>
+            
+            <div class="form-group">
+              <label for="val-dni-siniestro">DNI del Titular</label>
+              <input type="text" id="val-dni-siniestro" placeholder="12345678" />
+            </div>
+            
+            <div class="form-group">
+              <label for="val-patente-siniestro">Patente del Vehículo</label>
+              <input type="text" id="val-patente-siniestro" placeholder="ABC 123" />
+            </div>
+            
+            <!-- Error Message Container -->
+            <div id="msg-val-error-siniestro" class="error-message" style="display:none; color: #ef4444; background: rgba(239, 68, 68, 0.1); padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9em; text-align: center;"></div>
+
+            <button id="btn-validar-siniestro" class="btn-submit danger" onclick="validarClienteSiniestro()">
+              <i class="fas fa-check-circle"></i> Verificar Cobertura
+            </button>
+          </div>
+
+          <!-- PASO 2: Selección de Tipo -->
+          <div id="step-selection-siniestro" class="step-siniestro">
+            <p id="msg-bienvenida-siniestro" class="welcome-msg"></p>
+            
+            <p style="color: var(--white-70); margin-bottom: 20px;">Seleccioná el tipo de siniestro:</p>
+            
+      <!-- Opciones de Siniestro (DYNAMIC) -->
+      <div id="siniestros-menu-dynamic" class="selection-grid animate-fade-in">
+          <!-- Se llena con JS desde FORM_CONFIG -->
+          <div style="text-align:center; padding: 20px; width: 100%;">
+            <div class="loading-spinner">
+              <span>Cargando opciones...</span>
+            </div>
+          </div>
+      </div>
+            
+            <button class="btn-secondary" onclick="volverValidacionSiniestro()">
+              <i class="fas fa-arrow-left"></i> Volver
+            </button>
+          </div>
+
+          <!-- PASO 3: Formulario Airtable -->
+          <div id="step-form-siniestro" class="step-siniestro">
+            <div id="iframe-wrapper-siniestro"></div>
+            
+            <button class="btn-secondary" onclick="volverSeleccionSiniestro()" style="margin-top: 20px;">
+              <i class="fas fa-arrow-left"></i> Volver a Tipos
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Asesoría Online - Calendly style con toggle cliente -->
+    <div id="modal-asesoria" class="modal">
+      <div class="modal-content glass-premium" style="max-width: 880px; width: 96vw;">
+        <button class="modal-close" onclick="closeModal('asesoria')" type="button" aria-label="Cerrar modal">
+          &times;
+        </button>
+        <div class="modal-header warning">
+          <i class="fas fa-calendar-check"></i>
+          <h2>Reservar Asesoría Online</h2>
+        </div>
+        <div class="modal-body" style="padding: 0; max-height: 88vh; overflow-y: auto;">
+
+          <!-- Loader global -->
+          <div id="asesoria-loader" style="display: none; text-align: center; padding: 24px;">
+            <i class="fas fa-spinner fa-spin fa-2x" style="color:#1e3a8a;"></i>
+            <p style="margin-top: 8px; font-size: 0.85rem; color: #666;">Cargando disponibilidad...</p>
+          </div>
+
+          <form id="form-asesoria" class="form" style="padding: 20px 24px 24px;">
+
+            <!-- TOGGLE: ¿Sos cliente? -->
+            <div style="background: rgba(30,58,138,0.07); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+              <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); white-space: nowrap;">¿Ya sos cliente?</span>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" id="btn-toggle-cliente" onclick="setAsesoriaCliente(true)"
+                  style="padding: 6px 18px; border-radius: 20px; border: 2px solid #1e3a8a; background: #1e3a8a; color: #fff; font-weight: 600; cursor: pointer; font-size: 0.88rem; transition: all 0.2s;">
+                  Sí, soy cliente
+                </button>
+                <button type="button" id="btn-toggle-no-cliente" onclick="setAsesoriaCliente(false)"
+                  style="padding: 6px 18px; border-radius: 20px; border: 2px solid #cbd5e1; background: transparent; color: #555; font-weight: 600; cursor: pointer; font-size: 0.88rem; transition: all 0.2s;">
+                  No, soy nuevo
+                </button>
+              </div>
+              <div id="asesoria-cliente-badge" style="display: none; background: #d1fae5; border: 1px solid #10b981; border-radius: 8px; padding: 4px 12px; font-size: 0.85rem; color: #065f46; font-weight: 600;">
+                <i class="fas fa-check-circle"></i> <span id="asesoria-cliente-nombre">Cliente verificado</span>
+              </div>
+            </div>
+
+            <!-- CAMPOS CLIENTE (DNI + contraseña) -->
+            <div id="asesoria-fields-cliente" style="display: none; margin-bottom: 16px;">
+              <div class="asesoria-auth-row">
+                <div class="form-group" style="flex: 1 1 160px; margin-bottom: 0;">
+                  <label for="asesoria-dni">DNI <span class="required">*</span></label>
+                  <input type="text" id="asesoria-dni" name="dni_client" placeholder="Ej: 32456789" inputmode="numeric" maxlength="10" autocomplete="username">
+                </div>
+                <div class="form-group" style="flex: 1 1 160px; margin-bottom: 0;">
+                  <label for="asesoria-password">Contraseña del portal <span class="required">*</span></label>
+                  <input type="password" id="asesoria-password" name="password_client" placeholder="Tu contraseña" autocomplete="new-password">
+                </div>
+                <div class="form-group asesoria-verify-group">
+                  <label class="asesoria-verify-label" for="btn-verificar-cliente">Verificación</label>
+                  <button type="button" id="btn-verificar-cliente" onclick="verificarClienteAsesoria()">
+                    <i class="fas fa-search"></i> Verificar
+                  </button>
+                </div>
+              </div>
+              <p style="font-size: 0.78rem; color: #888; margin-top: 6px;">
+                Usá la misma contraseña que en el <a href="https://portal.rafaelallendeseguros.digital" target="_blank" style="color:#1e3a8a;">portal de autogestión</a>.
+              </p>
+            </div>
+
+            <!-- CAMPOS NO CLIENTE (nombre + email + teléfono) -->
+            <div id="asesoria-fields-no-cliente" style="display: block; margin-bottom: 16px;">
+              <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1 1 200px;">
+                  <label for="asesoria-nombre">Nombre completo <span class="required">*</span></label>
+                  <input type="text" id="asesoria-nombre" name="nombre" placeholder="Tu nombre completo">
+                </div>
+                <div class="form-group" style="flex: 1 1 200px;">
+                  <label for="asesoria-email">E-mail <span class="required">*</span></label>
+                  <input type="email" id="asesoria-email" name="email" placeholder="tucorreo@ejemplo.com">
+                </div>
+                <div class="form-group" style="flex: 1 1 200px;">
+                  <label for="asesoria-dni-no-cliente">DNI / ID <span class="required">*</span></label>
+                  <input type="text" id="asesoria-dni-no-cliente" name="dni_new" placeholder="Ej: 32456789" autocomplete="off">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="asesoria-telefono">Teléfono / WhatsApp <span class="required">*</span></label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                  <select id="asesoria-pais" style="width: auto; min-width: 110px; border-radius: 8px; border: 1px solid #d0d0d0; padding: 8px; background: #fff; font-size: 0.9rem; color: #333;">
+                    <option value="+54">AR (+54)</option>
+                    <option value="+34">ES (+34)</option>
+                    <option value="+1">US (+1)</option>
+                    <option value="+52">MX (+52)</option>
+                    <option value="+56">CL (+56)</option>
+                    <option value="+51">PE (+51)</option>
+                    <option value="+57">CO (+57)</option>
+                    <option value="+598">UY (+598)</option>
+                    <option value="+595">PY (+595)</option>
+                    <option value="+591">BO (+591)</option>
+                  </select>
+                  <input type="tel" id="asesoria-telefono" name="telefono" placeholder="9 11 12345678" style="flex: 1;">
+                </div>
+              </div>
+            </div>
+
+            <!-- SEPARADOR -->
+            <hr style="margin: 4px 0 18px; border: none; border-top: 1px solid rgba(0,0,0,0.08);">
+
+            <!-- CALENDARIO TIPO CALENDLY -->
+            <div style="margin-bottom: 16px;">
+              <h3 style="margin: 0 0 4px; font-size: 1.05rem; color: var(--text-primary);">Elegí día y horario</h3>
+              <p style="margin: 0 0 14px; font-size: 0.85rem; color: #777;">Seleccioná un día disponible y luego el horario (*)</p>
+
+              <!-- Calendly-style layout -->
+              <div id="calendly-widget" style="display: flex; gap: 0; border: 1px solid #dde3f0; border-radius: 14px; overflow: hidden; background: #fff; min-height: 300px;">
+
+                <!-- LADO IZQUIERDO: grilla de días -->
+                <div id="calendly-days-panel" style="flex: 0 0 200px; min-width: 180px; border-right: 1px solid #dde3f0; padding: 14px 10px; background: #f7f9ff;">
+                  <!-- Navegación mes -->
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                    <button type="button" id="cal-prev" onclick="calNavegarMes(-1)" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:#1e3a8a;padding:2px 7px;border-radius:6px;line-height:1;">&#8249;</button>
+                    <span id="cal-mes-label" style="font-size: 0.88rem; font-weight: 700; color: #1e3a8a; text-transform: capitalize;"></span>
+                    <button type="button" id="cal-next" onclick="calNavegarMes(1)" style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:#1e3a8a;padding:2px 7px;border-radius:6px;line-height:1;">&#8250;</button>
+                  </div>
+                  <!-- Cabeceras días semana -->
+                  <div style="display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; margin-bottom: 4px; text-align:center;">
+                    <div style="font-size:.68rem;font-weight:700;color:#888;">L</div>
+                    <div style="font-size:.68rem;font-weight:700;color:#888;">M</div>
+                    <div style="font-size:.68rem;font-weight:700;color:#888;">M</div>
+                    <div style="font-size:.68rem;font-weight:700;color:#888;">J</div>
+                    <div style="font-size:.68rem;font-weight:700;color:#888;">V</div>
+                    <div style="font-size:.68rem;font-weight:700;color:#888;">S</div>
+                    <div style="font-size:.68rem;font-weight:700;color:#888;">D</div>
+                  </div>
+                  <!-- Grilla de días -->
+                  <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;"></div>
+                  <!-- Leyenda -->
+                  <div style="margin-top: 10px; font-size: 0.7rem; color: #888; display: flex; flex-direction: column; gap: 3px;">
+                    <div style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:#1e3a8a;display:inline-block;"></span>Disponible</div>
+                    <div style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:#d1d5db;display:inline-block;"></span>Sin turnos</div>
+                  </div>
+                </div>
+
+                <!-- LADO DERECHO: slots de horario -->
+                <div class="scrollbar-hidden" data-scroll-hint="true" style="flex: 1; padding: 14px 16px; overflow-y: auto; max-height: 340px; min-width: 0;">
+                  <div id="cal-slots-header" style="font-size: 0.9rem; font-weight: 700; color: #1e3a8a; margin-bottom: 10px; min-height: 22px;"></div>
+                  <div id="cal-slots-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px,1fr)); gap: 8px;">
+                    <div style="color: #aaa; font-size: 0.85rem; grid-column: 1/-1; padding: 20px 0; text-align: center;">
+                      <i class="fas fa-calendar-alt" style="font-size:1.6rem; margin-bottom: 8px; display:block; color: #d0d7f0;"></i>
+                      Seleccioná un día para ver los horarios
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- SEPARADOR -->
+            <hr style="margin: 4px 0 16px; border: none; border-top: 1px solid rgba(0,0,0,0.08);">
+
+            <!-- PLATAFORMA -->
+            <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 4px;">
+              <div class="form-group" style="flex: 1 1 200px;">
+                <label for="asesoria-plataforma">Plataforma preferida <span class="required">*</span></label>
+                <select id="asesoria-plataforma" name="plataforma">
+                  <option value="" disabled selected>Elegí una opción</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Campos ocultos -->
+            <input type="hidden" id="asesoria-fecha" name="fecha">
+            <input type="hidden" id="asesoria-hora-seleccionada" name="hora_inicio">
+            <input type="hidden" id="asesoria-es-cliente" name="es_cliente" value="false">
+            <input type="hidden" id="asesoria-cliente-record-id" name="cliente_record_id" value="">
+
+            <!-- Campo MOTIVO -->
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label for="asesoria-motivo-select">Motivo de la asesoría <span class="required">*</span></label>
+              <select id="asesoria-motivo" name="motivo" required>
+                <option value="" disabled selected>Seleccioná el motivo...</option>
+              </select>
+            </div>
+            <!-- Campo NOTAS -->
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label for="asesoria-notas">Notas / Observaciones adicionales</label>
+              <textarea id="asesoria-notas" name="notas" placeholder="Escribí aquí cualquier detalle extra que quieras comentarnos..." style="width: 100%; border-radius: 8px; border: 1px solid #d0d0d0; padding: 10px; font-size: 0.9rem; min-height: 80px; resize: vertical;"></textarea>
+            </div>
+
+            <!-- BOTÓN SUBMIT -->
+            <div style="margin-top: 20px; text-align: center;">
+              <button type="submit" id="btn-confirmar-asesoria">
+                <i class="fas fa-calendar-check"></i> Confirmar Reserva
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <!-- Modal Mi Cuenta -->
+    <div id="modal-cuenta" class="modal">
+      <div class="modal-content glass-premium">
+        <button class="modal-close" onclick="closeModal('cuenta')" aria-label="Cerrar modal">
+          &times;
+        </button>
+        <div class="modal-header account">
+          <i class="fas fa-user-circle"></i>
+          <h2>Acceso a Mi Cuenta</h2>
+        </div>
+        <div class="modal-body">
+          <div class="features-list">
+            <div class="feature-item">
+              <i class="fas fa-file-alt"></i>
+              <span>Ver tu póliza activa</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-download"></i>
+              <span>Descargar certificado de cobertura</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-credit-card"></i>
+              <span>Consultar cuotas pendientes</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-history"></i>
+              <span>Historial de siniestros</span>
+            </div>
+          </div>
+          <a
+            href="https://portal.rafaelallendeseguros.digital"
+            class="btn-submit account"
+            target="_blank"
+          >
+            <i class="fas fa-sign-in-alt"></i>
+            Ingresar a Mi Cuenta
+          </a>
+          <p class="register-link">
+            ¿No tienes cuenta?
+            <a
+              href="https://portal.rafaelallendeseguros.digital/crear-clave.html"
+              target="_blank"
+              >Regístrate aquí</a
+            >
+          </p>
+          <div class="benefits-portal-shortcut">
+            <p class="benefits-portal-shortcut-title">¿También querés entrar al Club de Beneficios?</p>
+            <p class="benefits-portal-shortcut-text">
+              Ingresá a tu portal cliente del Club para ver beneficios, campañas y accesos propios del ecosistema de beneficios.
+            </p>
+            <a
+              href="https://beneficios.rafaelallendeseguros.digital/portal-club/cliente"
+              class="btn-submit benefits"
+              target="_blank"
+            >
+              <i class="fas fa-gift"></i>
+              Ir al portal cliente del Club
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal FAQ -->
+    <div id="modal-faq" class="modal">
+      <div class="modal-content glass-premium">
+        <button class="modal-close" onclick="closeModal('faq')" aria-label="Cerrar modal">&times;</button>
+        <div class="modal-header">
+          <i class="fas fa-question-circle"></i>
+          <h2>Preguntas Frecuentes</h2>
+        </div>
+        <div class="modal-body">
+          <div id="faq-dynamic-content" class="accordion">
+            <div class="loading-spinner">
+              <span>Cargando...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Sucursales -->
+    <div id="modal-sucursales" class="modal">
+      <div class="modal-content glass-premium">
+        <button class="modal-close" onclick="closeModal('sucursales')" aria-label="Cerrar modal">
+          &times;
+        </button>
+        <div class="modal-header">
+          <i class="fas fa-map-marked-alt"></i>
+          <h2>Nuestras Sucursales</h2>
+        </div>
+        <div class="modal-body">
+          <div class="branches-list">
+            <!-- Las sucursales se cargan dinámicamente desde la API -->
+          </div>
+          <div id="map" class="map-container">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d106752.62677796!2d-60.73697!3d-32.9442!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x95b6539335d7d75f%3A0xcb0d5c65f9eefc0a!2sRosario%2C%20Santa%20Fe!5e0!3m2!1ses!2sar!4v1234567890"
+              width="100%"
+              height="200"
+              style="border: 0; border-radius: 12px"
+              allowfullscreen=""
+              loading="lazy"
+            >
+            </iframe>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Quiénes Somos -->
+    <div id="modal-nosotros" class="modal">
+      <div class="modal-content glass-premium">
+        <button class="modal-close" onclick="closeModal('nosotros')" aria-label="Cerrar modal">
+          &times;
+        </button>
+        <div id="nosotros-dynamic-content" class="qs-modal-dynamic">
+          <div class="loading-spinner">
+            <span>Cargando...</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Calificar -->
+    <div id="modal-calificar" class="modal">
+      <div class="modal-content glass-premium">
+        <button class="modal-close" onclick="closeModal('calificar')" aria-label="Cerrar modal">
+          &times;
+        </button>
+        <div class="modal-header">
+          <i class="fas fa-star"></i>
+          <h2>Califica Nuestra Atención</h2>
+        </div>
+        <div class="modal-body">
+          <p class="rating-intro">¿Cómo fue tu experiencia con nosotros?</p>
+          <div class="star-rating">
+            <input type="radio" id="star5" name="rating" value="5" />
+            <label for="star5"><i class="fas fa-star"></i></label>
+            <input type="radio" id="star4" name="rating" value="4" />
+            <label for="star4"><i class="fas fa-star"></i></label>
+            <input type="radio" id="star3" name="rating" value="3" />
+            <label for="star3"><i class="fas fa-star"></i></label>
+            <input type="radio" id="star2" name="rating" value="2" />
+            <label for="star2"><i class="fas fa-star"></i></label>
+            <input type="radio" id="star1" name="rating" value="1" />
+            <label for="star1"><i class="fas fa-star"></i></label>
+          </div>
+          <form id="form-calificar" class="form">
+            <div class="form-group">
+              <label for="nombre-califica">Tu nombre</label>
+              <input
+                type="text"
+                id="nombre-califica"
+                placeholder="Juan Pérez"
+                required
+              />
+            </div>
+
+            <!-- ¿Sos cliente? -->
+            <div class="form-group">
+              <label>¿Sos cliente nuestro?</label>
+              <div class="toggle-group">
+                <label class="toggle-option">
+                  <input type="radio" name="es-cliente" value="Sí" />
+                  <span>Sí</span>
+                </label>
+                <label class="toggle-option">
+                  <input type="radio" name="es-cliente" value="No" checked />
+                  <span>No</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- DNI (condicional) -->
+            <div class="form-group" id="dni-group" style="display: none;">
+              <label for="dni-califica">Tu DNI</label>
+              <input
+                type="number"
+                id="dni-califica"
+                placeholder="12345678"
+              />
+              <small>Para encontrar tu ficha de cliente</small>
+            </div>
+
+            <!-- Servicio evaluado -->
+            <div class="form-group">
+              <label for="servicio-califica">¿Qué servicio estás calificando?</label>
+              <select id="servicio-califica" required>
+                <option value="">Selecciona una opción</option>
+                <option value="Atención General">Atención General</option>
+                <option value="Cotización">Cotización de Seguro</option>
+                <option value="Siniestro">Atención de Siniestro</option>
+                <option value="Gestión de Póliza">Gestión de Póliza</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="comentario">Comentarios (opcional)</label>
+              <textarea
+                id="comentario"
+                rows="3"
+                placeholder="Cuéntanos tu experiencia..."
+              ></textarea>
+            </div>
+
+            <!-- Permiso para publicar -->
+            <div class="form-group permission-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="autoriza-publicar" name="autoriza-publicar">
+                <span class="checkmark"></span>
+                <span class="checkbox-text">Autorizo mostrar mi nombre y opinión en el sitio web</span>
+              </label>
+            </div>
+
+            <!-- Permiso para usar foto (solo clientes) -->
+            <div class="form-group permission-group" id="foto-group" style="display: none;">
+              <label class="checkbox-label">
+                <input type="checkbox" id="usar-foto" name="usar-foto">
+                <span class="checkmark"></span>
+                <span class="checkbox-text">Autorizo usar mi foto de perfil en el testimonio</span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn-submit">
+              <i class="fas fa-paper-plane"></i>
+              Enviar Calificación
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal Acceso Autorizado (Empleados) -->
+    <div id="modal-acceso" class="modal">
+      <div class="modal-content glass-premium">
+        <button class="modal-close" onclick="closeModal('acceso')" aria-label="Cerrar modal">
+          &times;
+        </button>
+        <div class="modal-header employee">
+          <i class="fas fa-key"></i>
+          <h2>Acceso Autorizado</h2>
+        </div>
+        <div class="modal-body">
+          <p style="text-align: center; color: #666; margin-bottom: 1.5rem;">
+            Portal exclusivo para empleados y colaboradores de Rafael Allende &amp; Asociados.
+          </p>
+          <div class="features-list">
+            <div class="feature-item">
+              <i class="fas fa-tasks"></i>
+              <span>Gestión de tareas</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-users"></i>
+              <span>CRM de clientes</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-chart-line"></i>
+              <span>Reportes y métricas</span>
+            </div>
+            <div class="feature-item">
+              <i class="fas fa-cog"></i>
+              <span>Configuración</span>
+            </div>
+          </div>
+          <a
+            href="https://web-production-2584d.up.railway.app/login-empleados/"
+            class="btn-submit employee"
+            target="_blank"
+          >
+            <i class="fas fa-sign-in-alt"></i>
+            Ingresar al Sistema
+          </a>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Shared Chat Widget Premium -->
+    <div id="multi-chat-widget" class="multi-chat-widget">
+      <!-- Menu de opciones -->
+      <div id="chat-options-menu" class="chat-options-menu hidden">
+        <div class="menu-header">
+          <span>¿Cómo prefieres hablar?</span>
+        </div>
+        <div class="options-grid">
+          <a href="https://wa.me/5493417035515" target="_blank" class="chat-option whatsapp">
+            <div class="option-icon">
+              <i class="fab fa-whatsapp"></i>
+            </div>
+            <div class="option-label">WhatsApp</div>
+          </a>
+          <a href="https://t.me/sira_seguros_bot" target="_blank" class="chat-option telegram">
+            <div class="option-icon">
+              <i class="fab fa-telegram-plane"></i>
+            </div>
+            <div class="option-label">Telegram</div>
+          </a>
+          <div onclick="toggleWebChat()" class="chat-option webchat">
+            <div class="option-icon">
+              <i class="fas fa-comment-alt"></i>
+            </div>
+            <div class="option-label">Chat Web</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botón Principal con imagen de Cira -->
+      <button id="multi-chat-toggle" class="multi-chat-toggle cira-bubble" onclick="toggleChatMenu()">
+        <img src="assets/ia-avatar.png" alt="Sira" class="cira-avatar-bubble">
+        <span class="notification-dot"></span>
+      </button>
+    </div>
+
+    <!-- Web Chat Window (Oculta por defecto) -->
+    <div id="web-chat-window" class="web-chat-window hidden">
+      <div class="chat-window-header">
+        <div class="header-info-chat">
+          <img src="assets/ia-avatar.png" alt="Sira" class="chat-logo-small cira-header-img">
+          <span class="chat-title">Sira - Asesor Inteligente</span>
+        </div>
+        <button onclick="toggleWebChat()" class="close-chat-btn">&times;</button>
+      </div>
+      <div id="chat-messages" class="chat-messages">
+        <div class="message assistant">
+          <div class="bubble">¡Hola! 👋 Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?</div>
+        </div>
+      </div>
+      <div id="attachment-preview" class="attachment-preview hidden"></div>
+      <div class="chat-input-area">
+        <input type="file" id="chat-file-input" class="chat-file-input" accept="image/*,audio/*,.pdf,.doc,.docx,.txt,.csv,.xlsx,.xls" multiple>
+        <button id="attach-btn" class="chat-tool-btn" type="button" title="Adjuntar archivo" aria-label="Adjuntar archivo">
+          <i class="fas fa-paperclip"></i>
+        </button>
+        <input type="text" id="user-input" placeholder="Escribe un mensaje..." autocomplete="off">
+        <button id="record-btn" class="chat-tool-btn" type="button" title="Grabar audio" aria-label="Grabar audio">
+          <i class="fas fa-microphone"></i>
+        </button>
+        <button id="send-btn" onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+    <!-- Atencion conversacional migrada a WhatsApp YCloud -->
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="chat.js?v=pdf-reader-v2"></script>
+    <script src="app.js?v=final36-chatwoot-unread-click-zone-fix"></script>
+</body>
+</html>
