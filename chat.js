@@ -492,11 +492,10 @@ function suggestQuickReplies(replyText, data = {}) {
         contextualHint = 'Reservá tu turno cuando quieras';
     } else if (isStatusSensitive) {
         addQuickReplies([
-            { label: 'Ver estado' },
-            { label: 'Ver detalle' },
-            { label: 'Nueva consulta' },
+            { label: 'Soy cliente' },
+            { label: 'No soy cliente' },
         ]);
-        contextualHint = 'Revisemos tus gestiones en curso';
+        contextualHint = 'Para ver el estado de tu gestión, primero verifiquemos tu estado';
     } else if (isDocSensitive) {
         addQuickReplies([
             { label: 'Qué me falta' },
