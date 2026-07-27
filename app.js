@@ -1140,7 +1140,7 @@ async function mcotBuscarCotizaciones() {
     };
     
     const response = await fetchWithTimeout(
-      `${MULTICOTIZADOR_URL}/api/cotizar-123seguro`,
+      `${MULTICOTIZADOR_URL}/api/cotizar-triunfo`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
