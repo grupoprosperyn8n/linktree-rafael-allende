@@ -1062,7 +1062,7 @@ async function mcotPollResultados(idGestion) {
     
     try {
       const response = await fetchWithTimeout(
-        `https://web-production-2584d.up.railway.app/api/cotizar-status/${idGestion}`,
+        `${MULTICOTIZADOR_URL}/api/cotizar-status/${idGestion}`,
         { timeout: 10000 }
       );
       
@@ -1140,7 +1140,7 @@ async function mcotBuscarCotizaciones() {
     };
     
     const response = await fetchWithTimeout(
-      'https://web-production-2584d.up.railway.app/api/cotizar-123seguro',
+      `${MULTICOTIZADOR_URL}/api/cotizar-123seguro`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1337,7 +1337,7 @@ async function mcotElegirCotizacion(idx) {
   
   try {
     const response = await fetchWithTimeout(
-      'https://web-production-2584d.up.railway.app/api/cotizar-elegir',
+      `${MULTICOTIZADOR_URL}/api/cotizar-elegir`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1921,6 +1921,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // =====================================================
 
 const BACKEND_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:8000' : 'https://web-production-2584d.up.railway.app';
+const MULTICOTIZADOR_URL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:8001' : 'http://lpbhb3gn61w2bi4g8jihq9kf.187.127.45.42.sslip.io';
 const WEBHOOK_VALIDACION_SINIESTRO = `${BACKEND_URL}/api/validate-siniestro`;
 // const BACKEND_CREATE_SINIESTRO = "http://localhost:8000/api/create-siniestro"; // DEV
 const BACKEND_CREATE_SINIESTRO = `${BACKEND_URL}/api/create-siniestro`; // PROD
