@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Próximamente | Club de Beneficios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --primary: #0a84ff;
+      --primary-dark: #0066cc;
+      --primary-light: #40a9ff;
+      --accent: #00d4ff;
+      --warning: #ffd60a;
+      --dark-bg: #0a1929;
+      --glass-bg: rgba(255, 255, 255, 0.06);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --white: #ffffff;
+      --white-70: rgba(255, 255, 255, 0.7);
+      --white-50: rgba(255, 255, 255, 0.5);
+      --white-30: rgba(255, 255, 255, 0.3);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark-bg);
+      background: linear-gradient(135deg, #0a1929 0%, #0d2137 40%, #0f2847 70%, #0a1929 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Animated background particles */
+    .bg-particles {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--primary);
+      opacity: 0.08;
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .particle:nth-child(1) { width: 300px; height: 300px; top: -10%; left: -5%; animation-delay: 0s; }
+    .particle:nth-child(2) { width: 200px; height: 200px; top: 60%; right: -8%; background: var(--accent); animation-delay: -5s; }
+    .particle:nth-child(3) { width: 150px; height: 150px; bottom: -5%; left: 30%; background: var(--warning); animation-delay: -10s; opacity: 0.05; }
+    .particle:nth-child(4) { width: 100px; height: 100px; top: 20%; right: 25%; animation-delay: -15s; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      33% { transform: translateY(-30px) scale(1.05); }
+      66% { transform: translateY(20px) scale(0.95); }
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px 24px;
+      max-width: 480px;
+      width: 90%;
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 48px 32px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .icon-wrapper {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 24px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse-glow 3s infinite ease-in-out;
+    }
+
+    .icon-wrapper i {
+      font-size: 32px;
+      color: var(--white);
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(10, 132, 255, 0.3), 0 0 60px rgba(10, 132, 255, 0.1); }
+      50% { box-shadow: 0 0 30px rgba(10, 132, 255, 0.5), 0 0 80px rgba(10, 132, 255, 0.2); }
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--white) 0%, var(--primary-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .badge-coming {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--warning), #ff9500);
+      color: #1a1a2e;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      animation: badge-pulse 2s infinite;
+    }
+
+    @keyframes badge-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .description {
+      font-size: 1rem;
+      color: var(--white-70);
+      line-height: 1.6;
+      margin-bottom: 32px;
+    }
+
+    .features {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 36px;
+      text-align: left;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .feature-item i {
+      color: var(--accent);
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .feature-item span {
+      color: var(--white-50);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      color: var(--white-70);
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.25);
+      color: var(--white);
+    }
+
+    .footer-text {
+      margin-top: 24px;
+      font-size: 0.8rem;
+      color: var(--white-30);
+    }
+
+    @media (max-width: 400px) {
+      .glass-card { padding: 36px 20px; }
+      h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <div class="container">
+    <div class="glass-card">
+      <div class="icon-wrapper">
+        <i class="fas fa-gift"></i>
+      </div>
+
+      <div class="badge-coming">Próximamente</div>
+
+      <h1>Club de Beneficios</h1>
+
+      <p class="description">
+        Estamos preparando algo increíble para vos.
+        Descuentos exclusivos en +300 comercios adheridos.
+      </p>
+
+      <div class="features">
+        <div class="feature-item">
+          <i class="fas fa-percent"></i>
+          <span>Descuentos exclusivos para clientes</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-store"></i>
+          <span>+300 comercios adheridos</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-tag"></i>
+          <span>Promociones y campañas especiales</span>
+        </div>
+        <div class="feature-item">
+          <i class="fas fa-star"></i>
+          <span>Acceso prioritario a beneficios</span>
+        </div>
+      </div>
+
+      <a href="https://linktree.rafaelallendeseguros.digital/" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Volver al Linktree
+      </a>
+
+      <p class="footer-text">Rafael Allende &amp; Asociados — Productores de Seguros</p>
+    </div>
+  </div>
+</body>
+</html>
