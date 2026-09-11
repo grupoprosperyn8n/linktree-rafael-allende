@@ -3571,16 +3571,42 @@ select.form-input {
   box-shadow: 0 6px 16px rgba(0, 212, 255, 0.3);
 }
 
+.quick-replies-nav {
+  flex-basis: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.quick-reply-chip.quick-reply-back,
+.quick-reply-chip.quick-reply-again {
+  padding: 7px 13px;
+  font-size: 0.78rem;
+}
+
 .quick-reply-chip.quick-reply-back {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(255, 255, 255, 0.32);
   color: var(--white-70);
-  font-size: 0.8rem;
 }
 
 .quick-reply-chip.quick-reply-back:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.55);
+  color: var(--white);
+}
+
+.quick-reply-chip.quick-reply-again {
+  background: rgba(10, 132, 255, 0.14);
+  border-color: rgba(10, 132, 255, 0.45);
+  color: #bfe0ff;
+}
+
+.quick-reply-chip.quick-reply-again:hover {
+  background: rgba(10, 132, 255, 0.26);
+  border-color: var(--primary-light);
   color: var(--white);
 }
 

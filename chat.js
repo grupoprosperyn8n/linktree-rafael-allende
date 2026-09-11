@@ -322,41 +322,49 @@ function addMessage(text, sender, attachments = []) {
 }
 
 // --- Quick Replies contextuales ---
-let quickRepliesHistory = [];
+const OTHER_ANSWER_TEXT = 'Quiero elegir otra respuesta';
+let quickRepliesHistory = [];   // pila de sets de opciones anteriores
+let currentQuickReplies = [];   // set de opciones visible
 
-function addQuickReplies(replies) {
-    if (!replies || !replies.length) return;
-    const existing = chatMessages.querySelector('.quick-replies');
-    const prevLabels = existing ? Array.from(existing.querySelectorAll('.quick-reply-chip')).map(c => c.textContent) : [];
-
-    if (existing) {
-        if (prevLabels.length) quickRepliesHistory.push(prevLabels);
-        existing.remove();
-    }
-
-    const container = document.createElement('div');
-    container.className = 'quick-replies';
+// Fila fija de navegacion comun a todos los sets:
+//  - "Volver a las opciones anteriores" (solo si hay historial)
+//  - "Elegir otra respuesta" (SIEMPRE)
+function buildQuickRepliesNav() {
+    const nav = document.createElement('div');
+    nav.className = 'quick-replies-nav';
 
     if (quickRepliesHistory.length) {
         const backBtn = document.createElement('button');
         backBtn.type = 'button';
         backBtn.className = 'quick-reply-chip quick-reply-back';
-        backBtn.innerHTML = '<i class="fas fa-arrow-left"></i>';
-        backBtn.title = 'Volver a opciones anteriores';
+        backBtn.innerHTML = '<i class="fas fa-arrow-left" aria-hidden="true"></i>Volver a las opciones anteriores';
         backBtn.addEventListener('click', () => {
             const prev = quickRepliesHistory.pop();
-            if (prev) {
-                const currentLabels = Array.from(container.querySelectorAll('.quick-reply-chip:not(.quick-reply-back)')).map(c => ({ label: c.textContent }));
-                addQuickReplies(prev.map(l => ({ label: l })));
-                if (currentLabels.length) quickRepliesHistory.push(prev);
-                quickRepliesHistory = quickRepliesHistory.slice(0, -1);
-            }
-            container.remove();
+            currentQuickReplies = prev || [];
+            renderQuickReplies(currentQuickReplies);
         });
-        container.appendChild(backBtn);
+        nav.appendChild(backBtn);
     }
 
-    replies.forEach((item) => {
+    const againBtn = document.createElement('button');
+    againBtn.type = 'button';
+    againBtn.className = 'quick-reply-chip quick-reply-again';
+    againBtn.innerHTML = '<i class="fas fa-comment-dots" aria-hidden="true"></i>Elegir otra respuesta';
+    againBtn.addEventListener('click', () => {
+        sendQuickReply(OTHER_ANSWER_TEXT);
+    });
+    nav.appendChild(againBtn);
+    return nav;
+}
+
+function renderQuickReplies(replies) {
+    const existing = chatMessages.querySelector('.quick-replies');
+    if (existing) existing.remove();
+
+    const container = document.createElement('div');
+    container.className = 'quick-replies';
+
+    (replies || []).forEach((item) => {
         const label = typeof item === 'string' ? item : item.label;
         const url = typeof item === 'object' ? item.url : null;
         const chip = document.createElement('button');
@@ -371,41 +379,13 @@ function addQuickReplies(replies) {
             });
         } else {
             chip.addEventListener('click', () => {
-                container.remove();
-                lastUserMessage = label;
-                lastUserIntent = detectUserIntent(label);
-                addMessage(label, 'user');
-                userInput.value = '';
-                pendingAttachments = [];
-                const typingDiv = document.createElement('div');
-                typingDiv.classList.add('message', 'assistant', 'typing');
-                typingDiv.innerHTML = '<div class="bubble"><i class="fas fa-ellipsis-h fa-beat"></i></div>';
-                chatMessages.appendChild(typingDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(buildPayload(label, [])),
-                }).then(async (response) => {
-                    if (chatMessages.contains(typingDiv)) chatMessages.removeChild(typingDiv);
-                    if (!response.ok) throw new Error('Error');
-                    const data = await response.json();
-                    lastValidationStatus = data.validation_status || '';
-                    lastPortalAccess = data.portal_access || '';
-                    conversationIntent = data.intent || '';
-                    const reply = (data.output || data.reply_text || data.message || '').trim();
-                    if (reply) {
-                        addMessage(reply, 'assistant');
-                        suggestQuickReplies(reply, data);
-                    }
-                }).catch(() => {
-                    if (chatMessages.contains(typingDiv)) chatMessages.removeChild(typingDiv);
-                    addMessage('Lo siento, tengo una demora. ¿Probamos de nuevo?', 'assistant');
-                });
+                sendQuickReply(label);
             });
         }
         container.appendChild(chip);
     });
+
+    container.appendChild(buildQuickRepliesNav());
 
     const hint = document.createElement('div');
     hint.className = 'quick-reply-hint';
@@ -424,8 +404,56 @@ function addQuickReplies(replies) {
     }
 }
 
+// Set NUEVO (respuesta nueva del agente): guarda el actual para poder volver.
+function commitQuickReplies(replies) {
+    if (currentQuickReplies.length) {
+        quickRepliesHistory.push(currentQuickReplies);
+        if (quickRepliesHistory.length > 12) quickRepliesHistory.shift();
+    }
+    currentQuickReplies = (replies || []).slice();
+    renderQuickReplies(currentQuickReplies);
+}
+
+// Envia una opcion elegida (chip o boton fijo) al agente.
+function sendQuickReply(label) {
+    const existing = chatMessages.querySelector('.quick-replies');
+    if (existing) existing.remove();
+    lastUserMessage = label;
+    lastUserIntent = detectUserIntent(label);
+    addMessage(label, 'user');
+    if (userInput) userInput.value = '';
+    pendingAttachments = [];
+    const typingDiv = document.createElement('div');
+    typingDiv.classList.add('message', 'assistant', 'typing');
+    typingDiv.innerHTML = '<div class="bubble"><i class="fas fa-ellipsis-h fa-beat"></i></div>';
+    chatMessages.appendChild(typingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    fetch(N8N_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildPayload(label, [])),
+    }).then(async (response) => {
+        if (chatMessages.contains(typingDiv)) chatMessages.removeChild(typingDiv);
+        if (!response.ok) throw new Error('Error');
+        const data = await response.json();
+        lastValidationStatus = data.validation_status || '';
+        lastPortalAccess = data.portal_access || '';
+        lastDni = data.dni || lastDni;
+        lastPortalPassword = data.portal_password || lastPortalPassword;
+        conversationIntent = data.intent || '';
+        const reply = (data.output || data.reply_text || data.message || '').trim();
+        if (reply) {
+            addMessage(reply, 'assistant');
+            suggestQuickReplies(reply, data);
+        }
+    }).catch(() => {
+        if (chatMessages.contains(typingDiv)) chatMessages.removeChild(typingDiv);
+        addMessage('Lo siento, tengo una demora. ¿Probamos de nuevo?', 'assistant');
+    });
+}
+
 function suggestQuickReplies(replyText, data = {}) {
-    quickRepliesHistory = [];
+    let chipsSet = null;
     const lower = replyText.toLowerCase();
     const intent = (data.intent || conversationIntent || '').toLowerCase();
     const userIntentLower = lastUserIntent.toLowerCase();
@@ -460,131 +488,133 @@ function suggestQuickReplies(replyText, data = {}) {
 
     if (isClientYes) {
         clientValidationFlow = 'client_validated';
-        addQuickReplies([
+        chipsSet = [
             { label: 'Iniciar sesión en Portal', url: 'https://portal.rafaelallendeseguros.digital/' },
             { label: 'Recuperar contraseña', url: 'https://portal.rafaelallendeseguros.digital/recuperar-clave.html' },
             { label: 'Seguir sin validarme' },
-        ]);
+        ];
         contextualHint = 'Para acceder a tus datos, iniciá sesión o recuperá tu clave';
     } else if (isClientNo) {
         clientValidationFlow = 'not_client';
-        addQuickReplies([
+        chipsSet = [
             { label: 'Registrarme como cliente', url: 'https://portal.rafaelallendeseguros.digital/registro.html' },
             { label: 'Recuperar contraseña', url: 'https://portal.rafaelallendeseguros.digital/recuperar-clave.html' },
             { label: 'Seguir sin validarme' },
-        ]);
+        ];
         contextualHint = 'Podes registrarte o continuar sin validación';
     } else if (isContinueWithoutValidation) {
         clientValidationFlow = 'not_client';
-        addQuickReplies([
+        chipsSet = [
             { label: 'Consultas generales' },
             { label: 'Cotizar seguro' },
             { label: 'Agendar asesoría', url: 'https://linktree.rafaelallendeseguros.digital/?modal=asesoria' },
             { label: 'Contactar WhatsApp', url: 'https://wa.me/5493417035515' },
-        ]);
+        ];
         contextualHint = 'Estas son las gestiones disponibles para vos';
     } else if (isEmergency) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Hay heridos' },
             { label: 'Necesito auxilio' },
             { label: 'Hablar con asesor' },
             { label: 'Llamame ya', url: 'https://wa.me/5493417035515' },
-        ]);
+        ];
         contextualHint = 'Contame tu situación y te asisto urgente';
     } else if (isClaim) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Soy cliente' },
             { label: 'No soy cliente' },
-        ]);
+        ];
         contextualHint = 'Para cargar la denuncia, primero verifiquemos tu estado';
     } else if (isPolicySensitive) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Soy cliente' },
             { label: 'No soy cliente' },
-        ]);
+        ];
         contextualHint = 'Para ver tus pólizas, primero verifiquemos tu estado';
     } else if (isFaq) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Coberturas' },
             { label: 'Sucursales' },
             { label: 'Agendar asesoría', url: 'https://linktree.rafaelallendeseguros.digital/?modal=asesoria' },
             { label: 'Otra consulta' },
-        ]);
+        ];
         contextualHint = 'Preguntame lo que necesites saber';
     } else if (isPasswordHelp) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Crear clave', url: 'https://portal.rafaelallendeseguros.digital/crear-clave.html' },
             { label: 'Recuperar clave', url: 'https://portal.rafaelallendeseguros.digital/recuperar-clave.html' },
             { label: 'Ya tengo clave' },
-        ]);
+        ];
         contextualHint = 'Elegí la opción que necesites';
     } else if (isAdvisory) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Agendar ahora', url: 'https://linktree.rafaelallendeseguros.digital/?modal=asesoria' },
             { label: 'Contacto WhatsApp', url: 'https://wa.me/5493417035515' },
             { label: 'Otra consulta' },
-        ]);
+        ];
         contextualHint = 'Reservá tu turno cuando quieras';
     } else if (isStatusSensitive) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Soy cliente' },
             { label: 'No soy cliente' },
-        ]);
+        ];
         contextualHint = 'Para ver el estado de tu gestión, primero verifiquemos tu estado';
     } else if (isDocSensitive) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Soy cliente' },
             { label: 'No soy cliente' },
-        ]);
+        ];
         contextualHint = 'Para revisar documentación, primero verifiquemos tu estado';
     } else if (isHumanHandoff) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Llamame', url: 'https://wa.me/5493417035515' },
             { label: 'Dejar mi contacto' },
             { label: 'Nueva consulta' },
-        ]);
+        ];
         contextualHint = 'Un asesor va a comunicarse con vos';
     } else if (isSales) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Quiero cotizar' },
             { label: 'Agendar asesoría', url: 'https://linktree.rafaelallendeseguros.digital/?modal=asesoria' },
             { label: 'Info de coberturas' },
-        ]);
+        ];
         contextualHint = 'Contame qué seguro te interesa';
     } else if (isThanksGoodbye) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Nueva consulta' },
-        ]);
+        ];
         contextualHint = 'Para eso estoy. ¡Volvé cuando necesites!';
     } else if (isCancel) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Agendar asesoría', url: 'https://linktree.rafaelallendeseguros.digital/?modal=asesoria' },
             { label: 'Hablar con asesor' },
             { label: 'Contacto WhatsApp', url: 'https://wa.me/5493417035515' },
-        ]);
+        ];
         contextualHint = 'Un asesor te ayuda con esta gestión';
     } else if (isMalicious) {
         contextualHint = 'Soy Sira, tu asesora de seguros. ¿En qué puedo ayudarte?';
     } else if (isValidation || isError) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Crear clave', url: 'https://portal.rafaelallendeseguros.digital/crear-clave.html' },
             { label: 'Recuperar clave', url: 'https://portal.rafaelallendeseguros.digital/recuperar-clave.html' },
             { label: 'Hablar con asesor' },
-        ]);
+        ];
         contextualHint = 'Si no la tenés o la olvidaste, usá estas opciones';
     } else if (isGreeting) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Soy cliente' },
             { label: 'No soy cliente' },
-        ]);
+        ];
         contextualHint = 'Elegí para continuarte ayudando';
     } else if (isHelpOffer) {
-        addQuickReplies([
+        chipsSet = [
             { label: 'Soy cliente' },
             { label: 'No soy cliente' },
-        ]);
+        ];
         contextualHint = 'Elegí para continuarte ayudando';
     }
+
+    commitQuickReplies(chipsSet);
 
     if (contextualHint) {
         setTimeout(() => {
