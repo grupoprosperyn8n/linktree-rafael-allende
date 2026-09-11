@@ -3464,21 +3464,21 @@ select.form-input {
   width: fit-content;
   padding: 10px 22px;
   margin: 6px 0;
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: #ffffff !important;
   text-decoration: none;
   font-weight: 600;
   font-size: 0.85rem;
   border-radius: 10px;
   transition: all 0.2s ease;
-  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 3px 8px rgba(10, 132, 255, 0.3);
   letter-spacing: 0.3px;
 }
 
 .bubble a.chat-btn-link:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  background: linear-gradient(135deg, var(--primary-dark), #0052a3);
   transform: translateY(-1px);
-  box-shadow: 0 5px 14px rgba(37, 99, 235, 0.45);
+  box-shadow: 0 5px 14px rgba(10, 132, 255, 0.45);
 }
 
 .bubble a.chat-btn-link i {
@@ -3488,6 +3488,119 @@ select.form-input {
 
 .user .bubble a {
   color: #ffffff;
+}
+
+/* =====================================================
+   QUICK REPLIES - Botones dinámicos de gestión (Sira)
+   ===================================================== */
+.quick-replies {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  max-width: 92%;
+  padding: 2px 2px 0;
+  animation: quickRepliesIn 0.3s var(--ease-out) both;
+}
+
+@keyframes quickRepliesIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.quick-reply-chip {
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--font-family);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-full);
+  color: var(--white-90);
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast), border-color var(--transition-fast),
+    color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+}
+
+.quick-reply-chip:hover {
+  background: rgba(10, 132, 255, 0.22);
+  border-color: var(--primary-light);
+  color: var(--white);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(10, 132, 255, 0.28);
+}
+
+.quick-reply-chip:active {
+  transform: translateY(0) scale(0.98);
+  background: rgba(10, 132, 255, 0.3);
+}
+
+.quick-reply-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.quick-reply-chip.quick-reply-action {
+  background: rgba(0, 212, 255, 0.1);
+  border-color: rgba(0, 212, 255, 0.38);
+  color: #a7ecff;
+}
+
+.quick-reply-chip.quick-reply-action::after {
+  content: "↗";
+  font-size: 0.72rem;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+.quick-reply-chip.quick-reply-action:hover {
+  background: rgba(0, 212, 255, 0.2);
+  border-color: var(--accent);
+  color: var(--white);
+  box-shadow: 0 6px 16px rgba(0, 212, 255, 0.3);
+}
+
+.quick-reply-chip.quick-reply-back {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 50%;
+  color: var(--white-70);
+  font-size: 0.8rem;
+}
+
+.quick-reply-chip.quick-reply-back:hover {
+  color: var(--white);
+}
+
+.quick-reply-hint {
+  flex-basis: 100%;
+  width: 100%;
+  padding-left: 4px;
+  font-size: 0.72rem;
+  color: var(--white-50);
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 420px) {
+  .quick-reply-chip {
+    padding: 7px 12px;
+    font-size: 0.78rem;
+  }
+  .quick-replies {
+    max-width: 100%;
+  }
 }
 
 .message-attachments {
