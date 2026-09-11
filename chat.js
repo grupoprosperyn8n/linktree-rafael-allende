@@ -471,6 +471,13 @@ function sendQuickReply(label) {
     });
 }
 
+// Si la sesion ya esta validada, no volver a preguntar "Soy cliente / No soy cliente":
+// ofrecer las gestiones directas del caso (fallback por rama).
+function validationChips(fallback) {
+    if (lastValidationStatus === 'validated') return fallback;
+    return [{ label: 'Soy cliente' }, { label: 'No soy cliente' }];
+}
+
 function suggestQuickReplies(replyText, data = {}) {
     let chipsSet = null;
     const lower = replyText.toLowerCase();
@@ -539,17 +546,23 @@ function suggestQuickReplies(replyText, data = {}) {
         ];
         contextualHint = 'Contame tu situación y te asisto urgente';
     } else if (isClaim) {
-        chipsSet = [
-            { label: 'Soy cliente' },
-            { label: 'No soy cliente' },
-        ];
-        contextualHint = 'Para cargar la denuncia, primero verifiquemos tu estado';
+        chipsSet = validationChips([
+            { label: 'Cargar denuncia' },
+            { label: 'Hablar con asesor' },
+            { label: 'Otra consulta' },
+        ]);
+        if (lastValidationStatus !== 'validated') {
+            contextualHint = 'Para cargar la denuncia, primero verifiquemos tu estado';
+        }
     } else if (isPolicySensitive) {
-        chipsSet = [
-            { label: 'Soy cliente' },
-            { label: 'No soy cliente' },
-        ];
-        contextualHint = 'Para ver tus pólizas, primero verifiquemos tu estado';
+        chipsSet = validationChips([
+            { label: 'Ver mis pólizas' },
+            { label: 'Ver vencimientos' },
+            { label: 'Hablar con asesor' },
+        ]);
+        if (lastValidationStatus !== 'validated') {
+            contextualHint = 'Para ver tus pólizas, primero verifiquemos tu estado';
+        }
     } else if (isFaq) {
         chipsSet = [
             { label: 'Coberturas' },
@@ -573,17 +586,21 @@ function suggestQuickReplies(replyText, data = {}) {
         ];
         contextualHint = 'Reservá tu turno cuando quieras';
     } else if (isStatusSensitive) {
-        chipsSet = [
-            { label: 'Soy cliente' },
-            { label: 'No soy cliente' },
-        ];
-        contextualHint = 'Para ver el estado de tu gestión, primero verifiquemos tu estado';
+        chipsSet = validationChips([
+            { label: 'Ver estado de mi gestión' },
+            { label: 'Hablar con asesor' },
+        ]);
+        if (lastValidationStatus !== 'validated') {
+            contextualHint = 'Para ver el estado de tu gestión, primero verifiquemos tu estado';
+        }
     } else if (isDocSensitive) {
-        chipsSet = [
-            { label: 'Soy cliente' },
-            { label: 'No soy cliente' },
-        ];
-        contextualHint = 'Para revisar documentación, primero verifiquemos tu estado';
+        chipsSet = validationChips([
+            { label: 'Ver mi documentación' },
+            { label: 'Hablar con asesor' },
+        ]);
+        if (lastValidationStatus !== 'validated') {
+            contextualHint = 'Para revisar documentación, primero verifiquemos tu estado';
+        }
     } else if (isHumanHandoff) {
         chipsSet = [
             { label: 'Llamame', url: 'https://wa.me/5493417035515' },
@@ -620,17 +637,21 @@ function suggestQuickReplies(replyText, data = {}) {
         ];
         contextualHint = 'Si no la tenés o la olvidaste, usá estas opciones';
     } else if (isGreeting) {
-        chipsSet = [
-            { label: 'Soy cliente' },
-            { label: 'No soy cliente' },
-        ];
-        contextualHint = 'Elegí para continuarte ayudando';
+        chipsSet = validationChips([
+            { label: 'Otra consulta' },
+            { label: 'Hablar con asesor' },
+        ]);
+        if (lastValidationStatus !== 'validated') {
+            contextualHint = 'Elegí para continuarte ayudando';
+        }
     } else if (isHelpOffer) {
-        chipsSet = [
-            { label: 'Soy cliente' },
-            { label: 'No soy cliente' },
-        ];
-        contextualHint = 'Elegí para continuarte ayudando';
+        chipsSet = validationChips([
+            { label: 'Otra consulta' },
+            { label: 'Hablar con asesor' },
+        ]);
+        if (lastValidationStatus !== 'validated') {
+            contextualHint = 'Elegí para continuarte ayudando';
+        }
     }
 
     commitQuickReplies(chipsSet);
