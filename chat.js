@@ -326,6 +326,17 @@ const OTHER_ANSWER_TEXT = 'Quiero elegir otra respuesta';
 let quickRepliesHistory = [];   // pila de sets de opciones anteriores
 let currentQuickReplies = [];   // set de opciones visible
 
+// Si llega otro mensaje, aborta el fetch en vuelo: se muestra solo la
+// respuesta del ultimo (evita "demora" fantasma en rafagas).
+let activeFetchCtl = null;
+
+function abortActiveFetch() {
+    if (activeFetchCtl) {
+        try { activeFetchCtl.abort(); } catch (e) { /* noop */ }
+        activeFetchCtl = null;
+    }
+}
+
 // Fila fija de navegacion comun a todos los sets:
 //  - "Volver a las opciones anteriores" (solo si hay historial)
 //  - "Elegir otra respuesta" (SIEMPRE)
@@ -428,14 +439,19 @@ function sendQuickReply(label) {
     typingDiv.innerHTML = '<div class="bubble"><i class="fas fa-ellipsis-h fa-beat"></i></div>';
     chatMessages.appendChild(typingDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
+    abortActiveFetch();
+    const ctl = new AbortController();
+    activeFetchCtl = ctl;
     fetch(N8N_WEBHOOK_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(buildPayload(label, [])),
+        signal: ctl.signal,
     }).then(async (response) => {
         if (chatMessages.contains(typingDiv)) chatMessages.removeChild(typingDiv);
         if (!response.ok) throw new Error('Error');
         const data = await response.json();
+        if (data.silent) return;
         lastValidationStatus = data.validation_status || '';
         lastPortalAccess = data.portal_access || '';
         lastDni = data.dni || lastDni;
@@ -446,9 +462,12 @@ function sendQuickReply(label) {
             addMessage(reply, 'assistant');
             suggestQuickReplies(reply, data);
         }
-    }).catch(() => {
+    }).catch((error) => {
         if (chatMessages.contains(typingDiv)) chatMessages.removeChild(typingDiv);
+        if (error && error.name === 'AbortError') return;
         addMessage('Lo siento, tengo una demora. ¿Probamos de nuevo?', 'assistant');
+    }).finally(() => {
+        if (activeFetchCtl === ctl) activeFetchCtl = null;
     });
 }
 
@@ -795,17 +814,23 @@ async function sendMessage() {
     chatMessages.appendChild(typingDiv);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
+    abortActiveFetch();
+    const ctl = new AbortController();
+    activeFetchCtl = ctl;
+
     try {
         const response = await fetch(N8N_WEBHOOK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(buildPayload(text, attachments)),
+            signal: ctl.signal,
         });
 
         if (!response.ok) throw new Error('Error en la respuesta del servidor');
 
         const data = await response.json();
         chatMessages.removeChild(typingDiv);
+        if (data.silent) return;
         lastValidationStatus = data.validation_status || '';
         lastPortalAccess = data.portal_access || '';
         lastDni = data.dni || '';
@@ -818,9 +843,12 @@ async function sendMessage() {
             suggestQuickReplies(reply, data);
         }
     } catch (error) {
+        if (error && error.name === 'AbortError') return;
         console.error('Error Chat:', error);
         if (chatMessages.contains(typingDiv)) chatMessages.removeChild(typingDiv);
         addMessage('Lo siento, tengo una demora técnica. Por favor, intenta de nuevo o contáctanos por WhatsApp.', 'assistant');
+    } finally {
+        if (activeFetchCtl === ctl) activeFetchCtl = null;
     }
 }
 
