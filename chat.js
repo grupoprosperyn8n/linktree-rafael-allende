@@ -321,6 +321,73 @@ function addMessage(text, sender, attachments = []) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+// --- CRM Vocero: respuestas del equipo humano (bandeja -> widget) ---
+// El chat sigue conversando con Sira por el webhook de n8n; estas llamadas
+// solo LEEN del CRM lo que escribio una persona del equipo (polling) y el
+// estado de derivacion, para que quien este atendiendo pueda responder por
+// este mismo hilo.
+const CRM_BASE_URL = 'https://vocero.sistemasagenticos.cloud';
+const CRM_POLL_MS = 6000;
+const CRM_SEEN_KEY = 'siraWebChatCrmSeenIds';
+const MAX_CRM_SEEN = 200;
+let crmPollBusy = false;
+let crmHandoffShownFor = null;
+let crmSeenIds = (() => {
+    try {
+        const raw = localStorage.getItem(CRM_SEEN_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return new Set(Array.isArray(arr) ? arr : []);
+    } catch (e) {
+        return new Set();
+    }
+})();
+
+function rememberCrmSeen(id) {
+    crmSeenIds.add(id);
+    if (crmSeenIds.size > MAX_CRM_SEEN) {
+        crmSeenIds = new Set(Array.from(crmSeenIds).slice(-MAX_CRM_SEEN));
+    }
+    try {
+        localStorage.setItem(CRM_SEEN_KEY, JSON.stringify(Array.from(crmSeenIds)));
+    } catch (e) { /* noop */ }
+}
+
+async function pollCrmMessages() {
+    if (crmPollBusy || document.hidden) return;
+    crmPollBusy = true;
+    try {
+        const sessionId = getWebChatSessionId();
+        const url = `${CRM_BASE_URL}/api/public/web/messages?session=${encodeURIComponent(sessionId)}`;
+        const response = await fetch(url, { headers: { Accept: 'application/json' } });
+        if (!response.ok) return;
+        const data = await response.json();
+
+        const conv = data && data.conversation;
+        if (conv && conv.handoffAt && crmHandoffShownFor !== conv.handoffAt) {
+            crmHandoffShownFor = conv.handoffAt;
+            addMessage('👤 Te está atendiendo una persona del equipo — te responden por acá.', 'assistant');
+        }
+
+        const messages = Array.isArray(data && data.messages) ? data.messages : [];
+        messages.forEach((msg) => {
+            if (!msg || msg.direction !== 'out' || msg.aiGenerated) return; // lo de Sira ya se mostro por el webhook
+            if (crmSeenIds.has(msg.id)) return;
+            rememberCrmSeen(msg.id);
+            const text = String(msg.text || '').trim();
+            if (text) addMessage(text, 'assistant');
+        });
+    } catch (error) {
+        /* silencioso: sin CRM el chat sigue funcionando igual */
+    } finally {
+        crmPollBusy = false;
+    }
+}
+
+function startCrmPolling() {
+    pollCrmMessages();
+    setInterval(pollCrmMessages, CRM_POLL_MS);
+}
+
 // --- Quick Replies contextuales ---
 const OTHER_ANSWER_TEXT = 'Quiero elegir otra respuesta';
 let quickRepliesHistory = [];   // pila de sets de opciones anteriores
@@ -931,6 +998,9 @@ document.addEventListener('click', (event) => {
 
 // Warm-up: despertar Railway si está frío
 fetch('https://primary-production-0abcf.up.railway.app/', { method: 'HEAD' }).catch(() => {});
+
+// Respuestas del equipo humano del CRM: polling del canal web (fase 2).
+startCrmPolling();
 
 window.toggleChatMenu = toggleChatMenu;
 window.toggleWebChat = toggleWebChat;
