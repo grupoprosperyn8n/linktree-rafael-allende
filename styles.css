@@ -3418,6 +3418,41 @@ select.form-input {
   cursor: pointer;
 }
 
+/* Botón "Nueva conversación" del chat */
+.new-chat-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-right: 2px;
+  border-radius: 999px;
+  opacity: 0.9;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.new-chat-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  opacity: 1;
+}
+
+/* Toggle asesoría: estado activo bien visible */
+#btn-toggle-cliente[aria-pressed="true"]::after,
+#btn-toggle-no-cliente[aria-pressed="true"]::after {
+  content: " ✓";
+  font-weight: 900;
+}
+
+/* Campo faltante resaltado (validación con aviso visible) */
+.asesoria-field-error {
+  outline: 3px solid rgba(239, 68, 68, 0.7) !important;
+  outline-offset: 2px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.12);
+  transition: outline 0.2s ease;
+}
+
 .chat-messages {
   flex: 1;
   padding: 15px;

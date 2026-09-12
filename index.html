@@ -706,17 +706,17 @@
             <p style="margin-top: 8px; font-size: 0.85rem; color: #666;">Cargando disponibilidad...</p>
           </div>
 
-          <form id="form-asesoria" class="form" style="padding: 20px 24px 24px;">
+          <form id="form-asesoria" class="form" novalidate style="padding: 20px 24px 24px;">
 
             <!-- TOGGLE: ¿Sos cliente? -->
             <div style="background: rgba(30,58,138,0.07); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
               <span style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); white-space: nowrap;">¿Ya sos cliente?</span>
               <div style="display: flex; gap: 8px;">
-                <button type="button" id="btn-toggle-cliente" onclick="setAsesoriaCliente(true)"
+                <button type="button" id="btn-toggle-cliente" onclick="setAsesoriaCliente(true)" aria-pressed="false"
                   style="padding: 6px 18px; border-radius: 20px; border: 2px solid #1e3a8a; background: #1e3a8a; color: #fff; font-weight: 600; cursor: pointer; font-size: 0.88rem; transition: all 0.2s;">
                   Sí, soy cliente
                 </button>
-                <button type="button" id="btn-toggle-no-cliente" onclick="setAsesoriaCliente(false)"
+                <button type="button" id="btn-toggle-no-cliente" onclick="setAsesoriaCliente(false)" aria-pressed="false"
                   style="padding: 6px 18px; border-radius: 20px; border: 2px solid #cbd5e1; background: transparent; color: #555; font-weight: 600; cursor: pointer; font-size: 0.88rem; transition: all 0.2s;">
                   No, soy nuevo
                 </button>
@@ -724,6 +724,7 @@
               <div id="asesoria-cliente-badge" style="display: none; background: #d1fae5; border: 1px solid #10b981; border-radius: 8px; padding: 4px 12px; font-size: 0.85rem; color: #065f46; font-weight: 600;">
                 <i class="fas fa-check-circle"></i> <span id="asesoria-cliente-nombre">Cliente verificado</span>
               </div>
+              <div id="asesoria-toggle-hint" style="flex-basis: 100%; font-size: 0.83rem; color: #4b5563; margin-top: 2px;"></div>
             </div>
 
             <!-- CAMPOS CLIENTE (DNI + contraseña) -->
@@ -1205,6 +1206,7 @@
           <img src="assets/ia-avatar.png" alt="Sira" class="chat-logo-small cira-header-img">
           <span class="chat-title">Sira - Asesor Inteligente</span>
         </div>
+        <button onclick="resetConversation()" class="new-chat-btn" id="btn-nueva-conv" title="Nueva conversación (borra el hilo actual)" aria-label="Nueva conversación"><i class="fas fa-rotate-right"></i></button>
         <button onclick="toggleWebChat()" class="close-chat-btn">&times;</button>
       </div>
       <div id="chat-messages" class="chat-messages">
@@ -1231,7 +1233,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="chat.js?v=valid-v14"></script>
-    <script src="app.js?v=final36-chatwoot-unread-click-zone-fix"></script>
+    <script src="chat.js?v=valid-v15"></script>
+    <script src="app.js?v=final37-asesoria-validacion"></script>
 </body>
 </html>

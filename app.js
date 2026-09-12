@@ -589,7 +589,7 @@ document.querySelectorAll('.star-rating input').forEach(input => {
 // =====================================================
 
 // Número de WhatsApp de la empresa (cambiar por el real)
-const WHATSAPP_NUMBER = '5493415551234';
+const WHATSAPP_NUMBER = '5493417035515';
 
 // =====================================================
 // MULTICOTIZADOR DE SEGUROS
@@ -2931,6 +2931,16 @@ window.setAsesoriaCliente = function(esCliente) {
         }
     }
 
+    // Accesibilidad: estado activo perceptible + hint que explica la selección
+    if (btnSi) btnSi.setAttribute('aria-pressed', esCliente ? 'true' : 'false');
+    if (btnNo) btnNo.setAttribute('aria-pressed', esCliente ? 'false' : 'true');
+    const toggleHint = document.getElementById('asesoria-toggle-hint');
+    if (toggleHint) {
+        toggleHint.textContent = esCliente
+            ? 'Modo cliente: verificá tu DNI y contraseña y después elegí día y horario.'
+            : 'Modo nuevo cliente: completá tus datos (no hace falta contraseña). ¿Ya sos cliente? Tocá "Sí, soy cliente".';
+    }
+
     // Mostrar/ocultar contenedores de campos
     const fieldsCliente = document.getElementById('asesoria-fields-cliente');
     const fieldsNoCliente = document.getElementById('asesoria-fields-no-cliente');
@@ -3252,6 +3262,17 @@ function renderHorasPanel(dateStr) {
 
 
 
+// Resalta el campo que falta y lo trae a la vista (aviso claro, sin bloqueos silenciosos).
+function asesoriaHighlightField(el) {
+    if (!el) return;
+    el.classList.add('asesoria-field-error');
+    try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { el.scrollIntoView(); }
+    const clear = () => { el.classList.remove('asesoria-field-error'); el.removeEventListener('input', clear); el.removeEventListener('change', clear); };
+    el.addEventListener('input', clear);
+    el.addEventListener('change', clear);
+    setTimeout(clear, 7000);
+}
+
 function resetAsesoriaModal() {
     if (flatpickrInstance) flatpickrInstance.clear();
 
@@ -3301,13 +3322,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const motivoVal = (document.getElementById('asesoria-motivo') || {}).value?.trim();
             const plataformaVal = (document.getElementById('asesoria-plataforma') || {}).value;
 
-            // 2. Validaciones rápidas antes de bloquear el botón
+            // 2. Validaciones rápidas antes de bloquear el botón (aviso visible + scroll)
             if (!fechaVal || !horaVal) {
-                Swal.fire('Seleccioná fecha y hora', 'Por favor elegí un día en el calendario y un horario disponible.', 'warning');
+                Swal.fire('Seleccioná fecha y hora', 'Bajá hasta el calendario y elegí un día y un horario disponible.', 'warning');
+                asesoriaHighlightField(document.getElementById('calendly-widget'));
                 return;
             }
             if (!motivoVal || !plataformaVal) {
-                Swal.fire('Faltan campos', 'Por favor selecciona el motivo y la plataforma de la asesoría.', 'warning');
+                const detalleFalta = (!motivoVal && !plataformaVal)
+                    ? 'el motivo y la plataforma'
+                    : (!motivoVal ? 'el motivo de la asesoría' : 'la plataforma preferida');
+                Swal.fire('Faltan campos', `Completá ${detalleFalta} para continuar.`, 'warning');
+                asesoriaHighlightField(document.getElementById(!motivoVal ? 'asesoria-motivo' : 'asesoria-plataforma'));
                 return;
             }
 
@@ -3337,6 +3363,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (asesoriaEsCliente) {
                     if (!asesoriaClienteVerificado) {
                         Swal.fire('Verificación pendiente', 'Por favor verificá tu DNI y contraseña antes de confirmar.', 'warning');
+                        asesoriaHighlightField(document.getElementById('asesoria-fields-cliente'));
                         if (btnSubmit) { btnSubmit.innerHTML = originalText; btnSubmit.disabled = false; }
                         return;
                     }
@@ -3357,8 +3384,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     const telVal = (document.getElementById('asesoria-telefono') || {}).value?.trim();
                     const paisVal = (document.getElementById('asesoria-pais') || {}).value || '+54';
 
-                    if (!nombreVal || !emailVal || !dniNewVal || !telVal) {
-                        Swal.fire('Campos obligatorios', 'Para nuevos clientes, necesitamos nombre, email, DNI y teléfono.', 'warning');
+                    const faltantesNC = [];
+                    if (!nombreVal) faltantesNC.push({ id: 'asesoria-nombre', txt: 'nombre completo' });
+                    if (!emailVal) faltantesNC.push({ id: 'asesoria-email', txt: 'email' });
+                    if (!dniNewVal) faltantesNC.push({ id: 'asesoria-dni-no-cliente', txt: 'DNI / ID' });
+                    if (!telVal) faltantesNC.push({ id: 'asesoria-telefono', txt: 'teléfono' });
+                    if (emailVal && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+                        faltantesNC.push({ id: 'asesoria-email', txt: 'email (revisá el formato)' });
+                    }
+                    if (faltantesNC.length) {
+                        Swal.fire('Campos obligatorios', `Para nuevos clientes completá: ${faltantesNC.map(f => f.txt).join(', ')}.`, 'warning');
+                        asesoriaHighlightField(document.getElementById(faltantesNC[0].id));
                         if (btnSubmit) { btnSubmit.innerHTML = originalText; btnSubmit.disabled = false; }
                         return;
                     }

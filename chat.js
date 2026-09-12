@@ -365,7 +365,13 @@ async function pollCrmMessages() {
         const conv = data && data.conversation;
         if (conv && conv.handoffAt && crmHandoffShownFor !== conv.handoffAt) {
             crmHandoffShownFor = conv.handoffAt;
-            addMessage('👤 Te está atendiendo una persona del equipo — te responden por acá.', 'assistant');
+            // Solo avisar si la derivacion es reciente: evita el cartel de una
+            // conversacion vieja al reabrir el chat dias despues.
+            const handoffTs = Date.parse(conv.handoffAt);
+            const handoffFresh = !Number.isNaN(handoffTs) && (Date.now() - handoffTs) < 6 * 60 * 60 * 1000;
+            if (handoffFresh) {
+                addMessage('👤 Te está atendiendo una persona del equipo — te responden por acá.', 'assistant');
+            }
         }
 
         const messages = Array.isArray(data && data.messages) ? data.messages : [];
@@ -386,6 +392,14 @@ async function pollCrmMessages() {
 function startCrmPolling() {
     pollCrmMessages();
     setInterval(pollCrmMessages, CRM_POLL_MS);
+}
+
+// Arranque único: el visitante puede abrir/cerrar el chat muchas veces.
+let crmPollingStarted = false;
+function startCrmPollingOnce() {
+    if (crmPollingStarted) return;
+    crmPollingStarted = true;
+    startCrmPolling();
 }
 
 // --- Quick Replies contextuales ---
@@ -590,7 +604,7 @@ function suggestQuickReplies(replyText, data = {}) {
     } else if (isClientNo) {
         clientValidationFlow = 'not_client';
         chipsSet = [
-            { label: 'Registrarme como cliente', url: 'https://portal.rafaelallendeseguros.digital/registro.html' },
+            { label: 'Registrarme como cliente', url: 'https://registro.rafaelallendeseguros.digital/register.html' },
             { label: 'Recuperar contraseña', url: 'https://portal.rafaelallendeseguros.digital/recuperar-clave.html' },
             { label: 'Seguir sin validarme' },
         ];
@@ -601,7 +615,7 @@ function suggestQuickReplies(replyText, data = {}) {
             { label: 'Consultas generales' },
             { label: 'Cotizar seguro' },
             { label: 'Agendar asesoría', url: 'https://linktree.rafaelallendeseguros.digital/?modal=asesoria' },
-            { label: 'Contactar WhatsApp', url: 'https://wa.me/5493417035515' },
+            { label: 'Contactar por WhatsApp', url: 'https://wa.me/5493417035515' },
         ];
         contextualHint = 'Estas son las gestiones disponibles para vos';
     } else if (isEmergency) {
@@ -609,7 +623,7 @@ function suggestQuickReplies(replyText, data = {}) {
             { label: 'Hay heridos' },
             { label: 'Necesito auxilio' },
             { label: 'Hablar con asesor' },
-            { label: 'Llamame ya', url: 'https://wa.me/5493417035515' },
+            { label: 'Contactar ya por WhatsApp', url: 'https://wa.me/5493417035515' },
         ];
         contextualHint = 'Contame tu situación y te asisto urgente';
     } else if (isClaim) {
@@ -648,7 +662,7 @@ function suggestQuickReplies(replyText, data = {}) {
     } else if (isAdvisory) {
         chipsSet = [
             { label: 'Agendar ahora', url: 'https://linktree.rafaelallendeseguros.digital/?modal=asesoria' },
-            { label: 'Contacto WhatsApp', url: 'https://wa.me/5493417035515' },
+            { label: 'Contactar por WhatsApp', url: 'https://wa.me/5493417035515' },
             { label: 'Otra consulta' },
         ];
         contextualHint = 'Reservá tu turno cuando quieras';
@@ -670,7 +684,7 @@ function suggestQuickReplies(replyText, data = {}) {
         }
     } else if (isHumanHandoff) {
         chipsSet = [
-            { label: 'Llamame', url: 'https://wa.me/5493417035515' },
+            { label: 'Contactar por WhatsApp', url: 'https://wa.me/5493417035515' },
             { label: 'Dejar mi contacto' },
             { label: 'Nueva consulta' },
         ];
@@ -691,7 +705,7 @@ function suggestQuickReplies(replyText, data = {}) {
         chipsSet = [
             { label: 'Agendar asesoría', url: 'https://linktree.rafaelallendeseguros.digital/?modal=asesoria' },
             { label: 'Hablar con asesor' },
-            { label: 'Contacto WhatsApp', url: 'https://wa.me/5493417035515' },
+            { label: 'Contactar por WhatsApp', url: 'https://wa.me/5493417035515' },
         ];
         contextualHint = 'Un asesor te ayuda con esta gestión';
     } else if (isMalicious) {
@@ -745,6 +759,8 @@ function toggleWebChat() {
         userInput.focus();
         const dot = document.querySelector('.notification-dot');
         if (dot) dot.style.display = 'none';
+        // El polling al CRM arranca recien acá (no en cada carga de página).
+        startCrmPollingOnce();
     }
 }
 
@@ -999,9 +1015,39 @@ document.addEventListener('click', (event) => {
 // Warm-up: despertar Railway si está frío
 fetch('https://primary-production-0abcf.up.railway.app/', { method: 'HEAD' }).catch(() => {});
 
-// Respuestas del equipo humano del CRM: polling del canal web (fase 2).
-startCrmPolling();
+// Respuestas del equipo humano del CRM: el polling ahora arranca cuando el
+// visitante abre el chat por primera vez (ver toggleWebChat → startCrmPollingOnce).
+
+// --- "Nueva conversación": hilo limpio (sesión nueva + UI reseteada) ---
+// Captura el HTML inicial (burbuja de bienvenida) antes de agregar mensajes.
+const INITIAL_CHAT_HTML = chatMessages.innerHTML;
+
+function resetConversation() {
+    abortActiveFetch();
+    // Sesión nueva: también resetea la memoria del agente (clave por sesión).
+    try { localStorage.removeItem(WEBCHAT_SESSION_KEY); } catch (e) { /* noop */ }
+    getWebChatSessionId(); // genera y persiste una nueva
+    try { localStorage.removeItem(CRM_SEEN_KEY); } catch (e) { /* noop */ }
+    crmSeenIds = new Set();
+    crmHandoffShownFor = null;
+    quickRepliesHistory = [];
+    currentQuickReplies = [];
+    lastValidationStatus = '';
+    lastPortalAccess = '';
+    lastDni = '';
+    lastPortalPassword = '';
+    conversationIntent = '';
+    lastUserMessage = '';
+    lastUserIntent = '';
+    clientValidationFlow = '';
+    pendingAttachments = [];
+    renderPreview();
+    if (userInput) userInput.value = '';
+    chatMessages.innerHTML = INITIAL_CHAT_HTML;
+    chatMessages.scrollTop = 0;
+}
 
 window.toggleChatMenu = toggleChatMenu;
 window.toggleWebChat = toggleWebChat;
 window.sendMessage = sendMessage;
+window.resetConversation = resetConversation;
