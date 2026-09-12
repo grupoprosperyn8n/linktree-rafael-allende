@@ -517,6 +517,7 @@ const DEFAULT_OTHER_REPLIES = [
 ];
 const GENERIC_REPLY_LABELS = new Set([
     'soy cliente', 'no soy cliente', 'otra consulta', 'hablar con asesor', 'nueva consulta',
+    'crear clave', 'recuperar clave',
 ]);
 
 function buildOtherReplies(snapshot) {
