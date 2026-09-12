@@ -973,7 +973,7 @@ async function sendMessage() {
         if (!response.ok) throw new Error('Error en la respuesta del servidor');
 
         const data = await response.json();
-        chatMessages.removeChild(typingDiv);
+        if (chatMessages.contains(typingDiv)) chatMessages.removeChild(typingDiv);
         if (data.silent) return;
         lastValidationStatus = data.validation_status || '';
         lastPortalAccess = data.portal_access || '';
@@ -987,9 +987,9 @@ async function sendMessage() {
             suggestQuickReplies(reply, data);
         }
     } catch (error) {
+        if (chatMessages.contains(typingDiv)) chatMessages.removeChild(typingDiv);
         if (error && error.name === 'AbortError') return;
         console.error('Error Chat:', error);
-        if (chatMessages.contains(typingDiv)) chatMessages.removeChild(typingDiv);
         addMessage('Lo siento, tengo una demora técnica. Por favor, intenta de nuevo o contáctanos por WhatsApp.', 'assistant');
     } finally {
         if (activeFetchCtl === ctl) activeFetchCtl = null;
